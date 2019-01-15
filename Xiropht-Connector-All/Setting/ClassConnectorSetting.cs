@@ -37,6 +37,7 @@ namespace Xiropht_Connector_All.Setting
         public static List<string> SeedNodeIp = new List<string> {"87.98.156.228"};
 
         public const int MaxTimeoutConnect = 5000;
+        public const int MaxTimeoutConnectRemoteNode = 500;
         public const int MaxNetworkPacketSize = 8192;
         public const int MaxRemoteNodeInvalidPacket = 10;
         public const int MaxDelayRemoteNodeTrust = 60; // 60 seconds.

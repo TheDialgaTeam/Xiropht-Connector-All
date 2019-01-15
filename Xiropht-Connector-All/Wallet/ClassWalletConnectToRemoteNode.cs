@@ -220,7 +220,7 @@ namespace Xiropht_Connector_All.Wallet
         {
 
             var clientTask = _remoteNodeClient.ConnectAsync(host, port);
-            var delayTask = Task.Delay(ClassConnectorSetting.MaxTimeoutConnect);
+            var delayTask = Task.Delay(ClassConnectorSetting.MaxTimeoutConnectRemoteNode);
 
             var completedTask = await Task.WhenAny(new[] { clientTask, delayTask });
             return completedTask == clientTask;
