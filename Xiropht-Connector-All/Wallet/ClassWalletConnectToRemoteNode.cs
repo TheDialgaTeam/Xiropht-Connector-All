@@ -161,7 +161,7 @@ namespace Xiropht_Connector_All.Wallet
         /// <param name="host"></param>
         /// <param name="port"></param>
         /// <returns></returns>
-        public async Task<bool> ConnectToRemoteNodeAsync(string host, int port)
+        public async Task<bool> ConnectToRemoteNodeAsync(string host, int port, bool isLinux = false)
         {
             _remoteNodeClient?.Close();
             TotalInvalidPacket = 0;
@@ -175,14 +175,17 @@ namespace Xiropht_Connector_All.Wallet
             catch (Exception error)
             {
 #if DEBUG
-                Debug.WriteLine("Error to connect wallet on remote nodes: " + error.Message);
+                Console.WriteLine("Error to connect wallet on remote nodes: " + error.Message);
 #endif
                 RemoteNodeStatus = false;
                 return false;
             }
 
             RemoteNodeHost = host;
-            await Task.Run(() => EnableCheckConnection()).ConfigureAwait(false);
+            if (!isLinux)
+            {
+                await Task.Run(() => EnableCheckConnection()).ConfigureAwait(false);
+            }
             return true;
         }
 

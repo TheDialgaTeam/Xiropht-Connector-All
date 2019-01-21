@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Security.Permissions;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xiropht_Connector_All.Setting;
 using Xiropht_Connector_All.Utils;
@@ -122,7 +123,7 @@ namespace Xiropht_Connector_All.Seed
         ///     Start to connect on the seed node.
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> StartConnectToSeedAsync(string host, int port = ClassConnectorSetting.SeedNodePort)
+        public async Task<bool> StartConnectToSeedAsync(string host, int port = ClassConnectorSetting.SeedNodePort, bool isLinux = false)
         {
             if (!string.IsNullOrEmpty(host))
             {
@@ -161,6 +162,7 @@ namespace Xiropht_Connector_All.Seed
                         _connector = new TcpClient();
                         await _connector.ConnectAsync(ClassConnectorSetting.SeedNodeIp[i], port);
                         success = true;
+                        _isConnected = true;
                         break;
                     }
                     catch (Exception error)
@@ -174,15 +176,19 @@ namespace Xiropht_Connector_All.Seed
             if (success)
             {
                 _isConnected = true;
-                await Task.Run(() => EnableCheckConnection()).ConfigureAwait(false);
+
+                new Thread(() => EnableCheckConnection()).Start();
+
                 return true;
             }
-
-            _isConnected = false;
+            else
+            {
+                _isConnected = false;
+            }
             return false;
         }
 
-        private async void EnableCheckConnection()
+        private void EnableCheckConnection()
         {
             while(_isConnected)
             {
@@ -199,7 +205,7 @@ namespace Xiropht_Connector_All.Seed
                     _isConnected = false;
                     break;
                 }
-                await Task.Delay(1000);
+               Thread.Sleep(1000);
             }
         }
 
@@ -369,18 +375,22 @@ namespace Xiropht_Connector_All.Seed
         ///     Return the status of connection.
         /// </summary>
         /// <returns></returns>
-        public bool GetStatusConnectToSeed()
+        public bool GetStatusConnectToSeed(bool isLinux = false)
         {
-            try
+            if (!isLinux)
             {
-                if (!ClassUtils.SocketIsConnected(_connector))
+                try
+                {
+
+                    if (!ClassUtils.SocketIsConnected(_connector))
+                    {
+                        _isConnected = false;
+                    }
+                }
+                catch
                 {
                     _isConnected = false;
                 }
-            }
-            catch
-            {
-                _isConnected = false;
             }
             return _isConnected;
         }
