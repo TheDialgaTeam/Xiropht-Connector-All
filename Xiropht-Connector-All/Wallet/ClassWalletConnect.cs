@@ -14,6 +14,7 @@ namespace Xiropht_Connector_All.Wallet
     public class ClassWalletPhase
     {
         public const string Create = "CREATE";
+        public const string Restore = "RESTORE";
         public const string Login = "LOGIN";
         public const string Password = "PASSWORD";
         public const string Key = "KEY";
@@ -111,6 +112,7 @@ namespace Xiropht_Connector_All.Wallet
             return packet;
         }
 
+
         /// <summary>
         ///     Encrypt a packet according to wallet phase.
         /// </summary>
@@ -122,6 +124,7 @@ namespace Xiropht_Connector_All.Wallet
             {
                 case "":
                     return packet;
+                case ClassWalletPhase.Restore:
                 case ClassWalletPhase.Create:
                     return packet;
                 case ClassWalletPhase.Login:
@@ -144,6 +147,7 @@ namespace Xiropht_Connector_All.Wallet
             {
                 case "":
                     return packet;
+                case ClassWalletPhase.Restore:
                 case ClassWalletPhase.Create:
                     return packet;
                 case ClassWalletPhase.Login:
