@@ -6,6 +6,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Security.Permissions;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xiropht_Connector_All.Remote;
 using Xiropht_Connector_All.Setting;
@@ -182,27 +183,37 @@ namespace Xiropht_Connector_All.Wallet
             }
 
             RemoteNodeHost = host;
-            if (!isLinux)
-            {
-                await Task.Run(() => EnableCheckConnection()).ConfigureAwait(false);
-            }
+            
+            new Thread(() => EnableCheckConnection(isLinux)).Start();
+            
             return true;
         }
 
-        private async void EnableCheckConnection()
+        private async void EnableCheckConnection(bool isLinux)
         {
             while (RemoteNodeStatus)
             {
                 try
                 {
-                    if (!ClassUtils.SocketIsConnected(_remoteNodeClient))
+                    if (!isLinux)
                     {
-                        RemoteNodeStatus = false;
-                        break;
+                        if (!ClassUtils.SocketIsConnected(_remoteNodeClient))
+                        {
+                            RemoteNodeStatus = false;
+                            break;
+                        }
+                        else
+                        {
+                            if (!await SendPacketRemoteNodeAsync(ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.KeepAlive + "|0"))
+                            {
+                                RemoteNodeStatus = false;
+                                break;
+                            }
+                        }
                     }
                     else
                     {
-                        if (!await SendPacketRemoteNodeAsync(ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.KeepAlive+"|0"))
+                        if (!await SendPacketRemoteNodeAsync(ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.KeepAlive + "|0"))
                         {
                             RemoteNodeStatus = false;
                             break;
@@ -214,7 +225,7 @@ namespace Xiropht_Connector_All.Wallet
                     RemoteNodeStatus = false;
                     break;
                 }
-                await Task.Delay(2000);
+               Thread.Sleep(2000);
             }
         }
 
@@ -296,6 +307,7 @@ namespace Xiropht_Connector_All.Wallet
         [HostProtection(ExternalThreading = true)]
         public async Task<bool> SendPacketRemoteNodeAsync(string command)
         {
+
             try
             {
                 using (var packetObject = new ClassWalletConnectToRemoteNodeObjectSendPacket(command+"*"))
@@ -380,8 +392,10 @@ namespace Xiropht_Connector_All.Wallet
                     return false;
             }
 
+
             try
             {
+
                 await _remoteNodeClient.GetStream().WriteAsync(packet.packetByte, 0, packet.packetByte.Length);
                 await _remoteNodeClient.GetStream().FlushAsync();
                 packet?.Dispose();
@@ -395,6 +409,7 @@ namespace Xiropht_Connector_All.Wallet
 #endif
                 return false;
             }
+
 
             return true;
         }

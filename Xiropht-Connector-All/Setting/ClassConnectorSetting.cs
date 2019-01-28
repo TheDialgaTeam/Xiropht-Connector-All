@@ -44,7 +44,8 @@ namespace Xiropht_Connector_All.Setting
         public const string CoinName = "Xiropht";
         public const string CoinNameMin = "XIR";
         public const string NetworkPhase = "Private Test";
+        public const bool EnableSyncByRange = true;
+        public const int MaxSyncByRange = 8;
 
-        public const string PacketErrorLinux = "*redacted*";
     }
 }

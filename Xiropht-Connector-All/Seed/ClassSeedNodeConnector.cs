@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Security.Permissions;
@@ -222,6 +223,7 @@ namespace Xiropht_Connector_All.Seed
         public async Task<bool> SendPacketToSeedNodeAsync(string packet, string certificate, bool isSeedNode = false,
             bool isEncrypted = false)
         {
+
             try
             {
                 // 10/08/2018 - MAJOR_UPDATE_1_SECURITY
@@ -361,9 +363,7 @@ namespace Xiropht_Connector_All.Seed
                 _connectorReader = null;
                 _connectorStream = null;
 
-#if DEBUG
-                Console.WriteLine("Error to receive packet from seed node: " + error.Message);
-#endif
+
                 _isConnected = false;
                 return ClassSeedNodeStatus.SeedError;
             }
