@@ -21,6 +21,10 @@ namespace Xiropht_Connector_All.Setting
             MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE =
                 256; // Size of Certificate encryption [Between tools and seed nodes]
 
+        public const int
+            MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE_ITEM =
+                256;
+
         public const string NETWORK_GENESIS_DEFAULT_KEY = "XIROPHTKEY"; // DEFAULT GENESIS KEY [Small static part of dynamic key encryption between tools and blockchain.]
 
         /// <summary>
@@ -45,7 +49,7 @@ namespace Xiropht_Connector_All.Setting
         public const string CoinNameMin = "XIR";
         public const string NetworkPhase = "Private Test";
         public const bool EnableSyncByRange = true;
-        public const int MaxSyncByRange = 8;
+        public const int MaxSyncByRange = 5;
 
     }
 }

@@ -40,7 +40,7 @@ namespace Xiropht_Connector_All.Utils
         {
             var certificate = ClassConnectorSetting.NETWORK_GENESIS_SECONDARY_KEY;
             for (var i = 0;
-                i < ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE;
+                i < ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE_ITEM;
                 i++)
             {
                 var randomType = GetRandomBetween(0, 100);
@@ -56,6 +56,18 @@ namespace Xiropht_Connector_All.Utils
 
             return certificate;
         }
+
+        public static string CompressData(string data)
+        {
+            var byteData = Encoding.UTF8.GetBytes(data);
+            MemoryStream output = new MemoryStream();
+            using (DeflateStream dstream = new DeflateStream(output, CompressionLevel.Optimal))
+            {
+                dstream.Write(byteData, 0, byteData.Length);
+            }
+            return Convert.ToBase64String(output.ToArray());
+        }
+
 
         public static string FromHex(string hex)
         {
@@ -157,6 +169,18 @@ namespace Xiropht_Connector_All.Utils
                 hexres.Add(hexindex[str.Substring(i, 2)]);
 
             return hexres.ToArray();
+        }
+
+        public static string DecompressData(string data)
+        {
+
+            MemoryStream input = new MemoryStream(Convert.FromBase64String(data));
+            MemoryStream output = new MemoryStream();
+            using (DeflateStream dstream = new DeflateStream(input, CompressionMode.Decompress))
+            {
+                dstream.CopyTo(output);
+            }
+            return Encoding.UTF8.GetString(output.ToArray());
         }
 
         public static string DecompressWallet(string data)
