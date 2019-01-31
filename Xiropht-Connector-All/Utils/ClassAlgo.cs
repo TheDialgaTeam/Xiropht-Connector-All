@@ -51,7 +51,7 @@ namespace Xiropht_Connector_All.Utils
             catch (Exception erreur)
             {
 #if DEBUG
-                Debug.WriteLine("Error Decrypt of " + result + " : " + erreur.Message);
+                Debug.WriteLine("Error Decrypt of " + result + " with key: "+key+" : " + erreur.Message);
 #endif
             }
 

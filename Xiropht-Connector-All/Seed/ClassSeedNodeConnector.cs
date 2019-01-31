@@ -179,7 +179,8 @@ namespace Xiropht_Connector_All.Seed
             {
                 _isConnected = true;
 
-                new Thread(() => EnableCheckConnection()).Start();
+
+                new Thread(delegate () { EnableCheckConnection(); }).Start();
 
                 return true;
             }
@@ -190,6 +191,9 @@ namespace Xiropht_Connector_All.Seed
             return false;
         }
 
+        /// <summary>
+        /// Check the connection opened to the network.
+        /// </summary>
         private void EnableCheckConnection()
         {
             while(_isConnected)
@@ -236,8 +240,8 @@ namespace Xiropht_Connector_All.Seed
                         using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet, certificate,
                             ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*"))
                         {
-                            await _connector.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                            await _connector.GetStream().FlushAsync();
+                            await _connector.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length).ConfigureAwait(false);
+                            await _connector.GetStream().FlushAsync().ConfigureAwait(false);
                         }
 
                     }
@@ -247,16 +251,16 @@ namespace Xiropht_Connector_All.Seed
                         {
                             using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(packet + "*"))
                             {
-                                await _connector.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                                await _connector.GetStream().FlushAsync();
+                                await _connector.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length).ConfigureAwait(false);
+                                await _connector.GetStream().FlushAsync().ConfigureAwait(false);
                             }
                         }
                         else
                         {
                             using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(packet))
                             {
-                                await _connector.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                                await _connector.GetStream().FlushAsync();
+                                await _connector.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length).ConfigureAwait(false);
+                                await _connector.GetStream().FlushAsync().ConfigureAwait(false);
                             }
                         }
 
@@ -275,15 +279,6 @@ namespace Xiropht_Connector_All.Seed
             return true;
         }
 
-        private static string ConvertPath(string pathChange)
-        {
-            string path = Directory.GetCurrentDirectory() + pathChange;
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
-            {
-                path = path.Replace("\\", "/");
-            }
-            return path;
-        }
 
         /// <summary>
         ///     Listen and return packet from Seed Node.
@@ -335,6 +330,7 @@ namespace Xiropht_Connector_All.Seed
                                                         }
                                                         else
                                                         {
+                                                            
                                                             bufferPacket.packet += ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace("*", ""), certificate,
                                                                 ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*";
                                                         }
@@ -345,10 +341,17 @@ namespace Xiropht_Connector_All.Seed
                                     }
                                     else
                                     {
-                                        if (!bufferPacket.packet.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
+                                        if (!bufferPacket.packet.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId) && bufferPacket.packet != "S+doeIRrCNej5fpcdYlLei82iRevLLrdHWydr9Hs+fm/1sE78R9E5Mkp5BljBBACEguLAfDBYZx1nzEEuabCasq8m7Uwn7ZXwmiLjEWYOacpAkBYCbgvKA4h8dJw5VU2gAjt1yDgMPAZLxTGwAVc+ERSWghCfRBxx+SP5GH0u1yU9tJifLlVaXefVpMOXA07KDU6Ye2GrM18ez3Gxfu0xKt+Fo6cSVeX+GKuDMW2dRqns060zpOoOzxldSucHGAwprsyaxX3Kl6Ul5g0Wh3C7b1/2uTxvjmmk7J7dE3eClZw3hRF/2cDrEfr5lEbYsPWwLF5R/cP+Z2eFiXjZHG1Qo5W+zMcF91HmMNP/H8B")
                                         {
-                                            bufferPacket.packet = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, certificate,
-                                            ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE);
+                                            try
+                                            {
+                                                bufferPacket.packet = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, certificate,
+                                                ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*";
+                                            }
+                                            catch
+                                            {
+
+                                            }
                                         }
                                     }
                                 }
@@ -362,10 +365,9 @@ namespace Xiropht_Connector_All.Seed
                             return bufferPacket.packet;
                         }
                     }
-                    await _connectorStream.FlushAsync().ConfigureAwait(false);
                 }
             }
-            catch (Exception error)
+            catch (Exception)
             {
                 _connectorStream?.Close();
                 _connectorStream?.Dispose();
@@ -388,21 +390,6 @@ namespace Xiropht_Connector_All.Seed
         /// <returns></returns>
         public bool GetStatusConnectToSeed(bool isLinux = false)
         {
-            if (!isLinux)
-            {
-                try
-                {
-
-                    if (!ClassUtils.SocketIsConnected(_connector))
-                    {
-                        _isConnected = false;
-                    }
-                }
-                catch
-                {
-                    _isConnected = false;
-                }
-            }
             return _isConnected;
         }
 

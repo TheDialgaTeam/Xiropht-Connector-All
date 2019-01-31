@@ -149,12 +149,14 @@ namespace Xiropht_Connector_All.Wallet
             RemoteNodeStatus = true;
         }
 
+        /// <summary>
+        /// Return the connection status opened to a remote node.
+        /// </summary>
+        /// <returns></returns>
         public bool CheckRemoteNode()
         {
             return RemoteNodeStatus;
         }
-
-
 
         /// <summary>
         ///     Connect the wallet to a remote node.
@@ -183,33 +185,26 @@ namespace Xiropht_Connector_All.Wallet
             }
 
             RemoteNodeHost = host;
-            
-            new Thread(() => EnableCheckConnection(isLinux)).Start();
+
+            new Thread(delegate () { EnableCheckConnection(); }).Start();
             
             return true;
         }
 
-        private async void EnableCheckConnection(bool isLinux)
+        /// <summary>
+        /// Check the connection opened to the remote node.
+        /// </summary>
+        /// <param name="isLinux"></param>
+        private async void EnableCheckConnection()
         {
             while (RemoteNodeStatus)
             {
                 try
                 {
-                    if (!isLinux)
+                    if (!ClassUtils.SocketIsConnected(_remoteNodeClient))
                     {
-                        if (!ClassUtils.SocketIsConnected(_remoteNodeClient))
-                        {
-                            RemoteNodeStatus = false;
-                            break;
-                        }
-                        else
-                        {
-                            if (!await SendPacketRemoteNodeAsync(ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.KeepAlive + "|0"))
-                            {
-                                RemoteNodeStatus = false;
-                                break;
-                            }
-                        }
+                        RemoteNodeStatus = false;
+                        break;
                     }
                     else
                     {
@@ -219,13 +214,14 @@ namespace Xiropht_Connector_All.Wallet
                             break;
                         }
                     }
+
                 }
                 catch
                 {
                     RemoteNodeStatus = false;
                     break;
                 }
-               Thread.Sleep(2000);
+                Thread.Sleep(1000);
             }
         }
 
@@ -263,8 +259,6 @@ namespace Xiropht_Connector_All.Wallet
                         return new string(bufferPacket.buffer, 0, received);
                     }
                 }
-                await _remoteNodeStream.FlushAsync().ConfigureAwait(false);
-
             }
             catch (Exception error)
             {

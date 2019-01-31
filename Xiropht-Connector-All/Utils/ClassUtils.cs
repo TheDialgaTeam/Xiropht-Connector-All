@@ -61,7 +61,7 @@ namespace Xiropht_Connector_All.Utils
         {
             var byteData = Encoding.UTF8.GetBytes(data);
             MemoryStream output = new MemoryStream();
-            using (DeflateStream dstream = new DeflateStream(output, CompressionLevel.Optimal))
+            using (DeflateStream dstream = new DeflateStream(output, CompressionMode.Compress))
             {
                 dstream.Write(byteData, 0, byteData.Length);
             }
@@ -217,7 +217,7 @@ namespace Xiropht_Connector_All.Utils
             if (socket?.Client != null)
                 try
                 {
-                    return !(socket.Client.Poll(100, SelectMode.SelectRead) && socket.Available == 0);
+                    return !(socket.Client.Poll(1000, SelectMode.SelectRead) && socket.Available == 0);
                 }
                 catch
                 {
