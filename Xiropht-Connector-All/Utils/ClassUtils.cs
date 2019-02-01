@@ -217,7 +217,7 @@ namespace Xiropht_Connector_All.Utils
             if (socket?.Client != null)
                 try
                 {
-                    return !(socket.Client.Poll(1000, SelectMode.SelectRead) && socket.Available == 0);
+                    return !(socket.Client.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
                 }
                 catch
                 {

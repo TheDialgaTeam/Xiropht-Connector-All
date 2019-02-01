@@ -390,6 +390,10 @@ namespace Xiropht_Connector_All.Seed
         /// <returns></returns>
         public bool GetStatusConnectToSeed(bool isLinux = false)
         {
+            if (!ClassUtils.SocketIsConnected(_connector))
+            {
+                _isConnected = false;
+            }
             return _isConnected;
         }
 
