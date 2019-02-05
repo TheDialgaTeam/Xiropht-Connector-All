@@ -390,10 +390,26 @@ namespace Xiropht_Connector_All.Seed
         /// <returns></returns>
         public bool GetStatusConnectToSeed(bool isLinux = false)
         {
-            if (!ClassUtils.SocketIsConnected(_connector))
+            if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
-                _isConnected = false;
+                isLinux = true;
             }
+            if (!isLinux)
+            {
+                if (!ClassUtils.SocketIsConnected(_connector))
+                {
+                    _isConnected = false;
+                }
+            }
+            return _isConnected;
+        }
+        
+        /// <summary>
+        /// Return directly status without to proceed check.
+        /// </summary>
+        /// <returns></returns>
+        public bool ReturnStatus()
+        {
             return _isConnected;
         }
 

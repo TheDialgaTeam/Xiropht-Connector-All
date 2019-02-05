@@ -221,7 +221,7 @@ namespace Xiropht_Connector_All.Wallet
                     RemoteNodeStatus = false;
                     break;
                 }
-                Thread.Sleep(1000);
+                Thread.Sleep(5000);
             }
         }
 
@@ -306,8 +306,8 @@ namespace Xiropht_Connector_All.Wallet
             {
                 using (var packetObject = new ClassWalletConnectToRemoteNodeObjectSendPacket(command+"*"))
                 {
-                    await _remoteNodeClient.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                    await _remoteNodeClient.GetStream().FlushAsync();
+                    await _remoteNodeClient.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length).ConfigureAwait(false);
+                    await _remoteNodeClient.GetStream().FlushAsync().ConfigureAwait(false);
                 }
             }
             catch
