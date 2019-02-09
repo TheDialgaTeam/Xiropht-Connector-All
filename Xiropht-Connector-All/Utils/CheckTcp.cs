@@ -30,7 +30,12 @@ namespace Xiropht_Connector_All.Utils
             using (var client = new TcpClient())
             {
                 var clientTask = client.ConnectAsync(host, port);
-                var delayTask = Task.Delay(ClassConnectorSetting.MaxTimeoutConnectRemoteNode);
+                var timeoutConnect = ClassConnectorSetting.MaxTimeoutConnectRemoteNode;
+                if (host == "127.0.0.1" || host == "localhost")
+                {
+                    timeoutConnect = ClassConnectorSetting.MaxTimeoutConnectLocalhostRemoteNode;
+                }
+                var delayTask = Task.Delay(timeoutConnect);
 
                 var completedTask = await Task.WhenAny(new[] { clientTask, delayTask });
                 return completedTask == clientTask;

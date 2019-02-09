@@ -32,24 +32,23 @@ namespace Xiropht_Connector_All.Setting
         /// </summary>
         public static string
             NETWORK_GENESIS_KEY =
-                "XIROPHTKEY"; // GENESIS KEY [Small static part of dynamic key encryption between tools and blockchain, updated by the blockchain in real time.]
+                "XIROPHTKEY"; // GENESIS KEY [Small static part included on dynamic key encryption between tools and blockchain, updated by the blockchain in real time.]
 
         public const string
             NETWORK_GENESIS_SECONDARY_KEY =
-                "XIROPHTSEED"; // GENESIS SECONDARY KEY [Layer encryption key include on dynamic certificate key between tools and seed nodes]
+                "XIROPHTSEED"; // GENESIS SECONDARY KEY [Layer encryption key included on dynamic certificate key between tools and seed nodes]
 
         public static List<string> SeedNodeIp = new List<string> {"87.98.156.228"};
 
         public const int MaxTimeoutConnect = 5000;
         public const int MaxTimeoutConnectRemoteNode = 500;
+        public const int MaxTimeoutConnectLocalhostRemoteNode = 100;
         public const int MaxNetworkPacketSize = 8192;
         public const int MaxRemoteNodeInvalidPacket = 10;
-        public const int MaxDelayRemoteNodeTrust = 60; // 60 seconds.
+        public const int MaxRemoteNodeBanTime = 60; // 60 seconds.
+        public const int MaxDelayRemoteNodeTrust = 30; // 30 seconds.
         public const string CoinName = "Xiropht";
         public const string CoinNameMin = "XIR";
         public const string NetworkPhase = "Private Test";
-        public const bool EnableSyncByRange = true;
-        public const int MaxSyncByRange = 5;
-
     }
 }

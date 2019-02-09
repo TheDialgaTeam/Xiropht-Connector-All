@@ -29,7 +29,6 @@ namespace Xiropht_Connector_All.Utils
         private static readonly List<string> ListOfSpecialCharacters =
             new List<string> {"&", "~", "#", "@", "'", "(", "|", "\\", ")", "="};
 
-        private static readonly RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider();
 
 
         /// <summary>
@@ -84,7 +83,9 @@ namespace Xiropht_Connector_All.Utils
         /// <returns></returns>
         public static int GetRandomBetween(int minimumValue, int maximumValue)
         {
-            var randomNumber = new byte[1];
+            RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider();
+
+            var randomNumber = new byte[sizeof(int)];
 
             Generator.GetBytes(randomNumber);
 
@@ -96,7 +97,7 @@ namespace Xiropht_Connector_All.Utils
 
             var randomValueInRange = Math.Floor(multiplier * range);
 
-            return (int) (minimumValue + randomValueInRange);
+            return (int)(minimumValue + randomValueInRange);
         }
 
         public static CultureInfo GlobalCultureInfo = new CultureInfo("fr-FR");
@@ -183,17 +184,6 @@ namespace Xiropht_Connector_All.Utils
             return Encoding.UTF8.GetString(output.ToArray());
         }
 
-        public static string DecompressWallet(string data)
-        {
-
-            MemoryStream input = new MemoryStream(Convert.FromBase64String(data));
-            MemoryStream output = new MemoryStream();
-            using (DeflateStream dstream = new DeflateStream(input, CompressionMode.Decompress))
-            {
-                dstream.CopyTo(output);
-            }
-            return Encoding.UTF8.GetString(output.ToArray());
-        }
 
         public static string ConvertStringtoSHA512(string str)
         {
@@ -217,7 +207,7 @@ namespace Xiropht_Connector_All.Utils
             if (socket?.Client != null)
                 try
                 {
-                    return !(socket.Client.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
+                    return !(socket.Client.Poll(10, SelectMode.SelectRead) && socket.Available == 0);
                 }
                 catch
                 {

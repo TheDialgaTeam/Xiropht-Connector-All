@@ -137,8 +137,6 @@ namespace Xiropht_Connector_All.Utils
             disposed = true;
         }
 
-        //private const string InitVector = "HR$2pIjHR$2pIj12";
-
         /// <summary>
         /// Encrypt string from Rijndael.
         /// </summary>
