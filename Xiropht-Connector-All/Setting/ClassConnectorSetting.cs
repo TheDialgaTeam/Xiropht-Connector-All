@@ -5,6 +5,7 @@ namespace Xiropht_Connector_All.Setting
     public class ClassConnectorSetting
     {
         public const int SeedNodePort = 18000;
+        public const int RemoteNodeHttpPort = 18001;
         public const int RemoteNodePort = 18002;
 
         /// <summary>
