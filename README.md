@@ -1,6 +1,6 @@
 # Xiropht-Connector-All
 
-The library for each tools of Xiropht, this library permit to make your own connected tools, for example your own wallet, remote node and more.
+The library for each tools of Xiropht, this library permit to make your own connected tools, for example your own wallet, remote node and more. Netframework 4.6.1 is required or mono for Linux OS.
 
 **In production, we suggest to compile in Release Mode for disable log files.**
 
