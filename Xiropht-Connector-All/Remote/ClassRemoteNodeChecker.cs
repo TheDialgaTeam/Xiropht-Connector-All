@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Xiropht_Connector.Remote;
 using Xiropht_Connector_All.Setting;
 using Xiropht_Connector_All.Utils;

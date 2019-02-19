@@ -25,10 +25,10 @@
             public const string RemoteAskTotalFee = "ASK-TOTAL-FEE";
 
             /// <summary>
-            ///     Command for blocks
+            ///     Command for keep alive connection
             /// </summary>
 
-            public const string RemoteKeepAlive = "KEEP-ALIVE"; // All phase
+            public const string RemoteKeepAlive = "KEEP-ALIVE"; 
 
             /// <summary>
             /// Command for check
@@ -44,6 +44,7 @@
             public const string RemoteCheckTransactionHash = "CHECK-TRANSACTION-HASH";
 
             public const string RemoteCheckTrustedKey = "CHECK-TRUSTED-KEY";
+
 
         }
 
@@ -79,6 +80,12 @@
             public const string RemoteSendTotalFee = "SEND-TOTAL-FEE";
 
             /// <summary>
+            ///     Command for keep alive connection
+            /// </summary>
+
+            public const string RemoteKeepAlive = "KEEP-ALIVE";
+
+            /// <summary>
             /// Command for check
             /// </summary>
             public const string RemoteSendAskBlockPerId = "SEND-ASK-BLOCK-PER-ID";
@@ -87,6 +94,7 @@
             public const string RemoteSendCheckBlockHash = "SEND-CHECK-BLOCK-HASH";
             public const string RemoteSendCheckTransactionHash = "SEND-CHECK-TRANSACTION-HASH";
             public const string RemoteSendCheckTrustedKey = "SEND-CHECK-TRUSTED-KEY";
+
         }
     }
 }
