@@ -100,6 +100,31 @@ namespace Xiropht_Connector_All.Utils
             return (int)(minimumValue + randomValueInRange);
         }
 
+        /// <summary>
+        ///     Génère un nombre réellement aléatoire en long.
+        /// </summary>
+        /// <param name="minimumValue"></param>
+        /// <param name="maximumValue"></param>
+        /// <returns></returns>
+        public static long GetRandomBetweenLong(long minimumValue, long maximumValue)
+        {
+            RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider();
+
+            var randomNumber = new byte[sizeof(long)];
+
+            Generator.GetBytes(randomNumber);
+
+            var asciiValueOfRandomCharacter = Convert.ToDouble(randomNumber[0]);
+
+            var multiplier = Math.Max(0, asciiValueOfRandomCharacter / 255d - 0.00000000001d);
+
+            var range = maximumValue - minimumValue + 1;
+
+            var randomValueInRange = Math.Floor(multiplier * range);
+
+            return (long)(minimumValue + randomValueInRange);
+        }
+
         public static CultureInfo GlobalCultureInfo = new CultureInfo("fr-FR");
         /// <summary>
         ///     Translate hashrate from H/s into KH/s or other units.
