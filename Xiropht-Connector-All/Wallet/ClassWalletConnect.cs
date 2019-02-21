@@ -69,7 +69,7 @@ namespace Xiropht_Connector_All.Wallet
         ///     Receive packet from seed nodes for wallet.
         /// </summary>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<string> ListenPacketWalletAsync(string certificate, bool isEncrypted)
+        public async Task<string> ListenPacketWalletAsync(string certificate, bool isEncrypted)
         {
             string packet = string.Empty;
             try

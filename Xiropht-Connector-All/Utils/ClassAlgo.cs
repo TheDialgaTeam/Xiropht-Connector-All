@@ -53,9 +53,10 @@ namespace Xiropht_Connector_All.Utils
 #if DEBUG
                 Debug.WriteLine("Error Decrypt of " + result + " with key: "+key+" : " + erreur.Message);
 #endif
+                return ClassAlgoErrorEnumeration.AlgoError;
             }
 
-            return "WRONG";
+            return ClassAlgoErrorEnumeration.AlgoError;
         }
 
         /// <summary>
@@ -86,9 +87,10 @@ namespace Xiropht_Connector_All.Utils
 #if DEBUG
                 Debug.WriteLine("Error Encrypt of " + result + " : " + erreur.Message);
 #endif
+                return ClassAlgoErrorEnumeration.AlgoError;
             }
 
-            return "WRONG";
+            return ClassAlgoErrorEnumeration.AlgoError;
         }
 
         /// <summary>
