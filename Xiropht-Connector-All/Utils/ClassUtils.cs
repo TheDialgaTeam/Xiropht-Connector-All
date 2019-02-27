@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -232,7 +234,11 @@ namespace Xiropht_Connector_All.Utils
             if (socket?.Client != null)
                 try
                 {
-                    return !(socket.Client.Poll(10, SelectMode.SelectRead) && socket.Available == 0);
+                    if (isClientConnected(socket))
+                    {
+                        return true;
+                    }
+                    return !(socket.Client.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
                 }
                 catch
                 {
@@ -240,6 +246,40 @@ namespace Xiropht_Connector_All.Utils
                 }
 
             return false;
+        }
+
+        public static bool isClientConnected(TcpClient ClientSocket)
+        {
+            try
+            {
+                var stateOfConnection = GetState(ClientSocket);
+
+
+                if (stateOfConnection != TcpState.Closed && stateOfConnection != TcpState.CloseWait && stateOfConnection != TcpState.Closing)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+        }
+
+        public static TcpState GetState(TcpClient tcpClient)
+        {
+            var foo = IPGlobalProperties.GetIPGlobalProperties()
+              .GetActiveTcpConnections()
+              .SingleOrDefault(x => x.LocalEndPoint.Equals(tcpClient.Client.LocalEndPoint)
+                                 && x.RemoteEndPoint.Equals(tcpClient.Client.RemoteEndPoint)
+              );
+
+            return foo != null ? foo.State : TcpState.Unknown;
         }
     }
 }

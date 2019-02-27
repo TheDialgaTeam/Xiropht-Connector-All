@@ -43,6 +43,7 @@ namespace Xiropht_Connector_All.Setting
 
         public const int MaxTimeoutConnect = 5000;
         public const int MaxTimeoutConnectRemoteNode = 500;
+        public const int MaxTimeoutSendPacket = 2000;
         public const int MaxTimeoutConnectLocalhostRemoteNode = 100;
         public const int MaxNetworkPacketSize = 8192;
         public const int MaxRemoteNodeInvalidPacket = 10;
