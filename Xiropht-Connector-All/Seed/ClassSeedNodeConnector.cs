@@ -88,7 +88,6 @@ namespace Xiropht_Connector_All.Seed
     public class ClassSeedNodeConnector : IDisposable
     {
         private TcpClient _connector;
-        private NetworkStream _connectorStream;
         private bool _isConnected;
         private bool disposed;
 
@@ -113,7 +112,6 @@ namespace Xiropht_Connector_All.Seed
             if (disposing)
             {
                 _connector = null;
-                _connectorStream = null;
             }
             disposed = true;
         }
@@ -232,41 +230,43 @@ namespace Xiropht_Connector_All.Seed
             try
             {
 
-                _connectorStream = new NetworkStream(_connector.Client);
-
-                // 10/08/2018 - MAJOR_UPDATE_1_SECURITY
-                if (ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY) // SSL Layer for Send packet.
+                using(var _connectorStream = new NetworkStream(_connector.Client))
                 {
-                    if (isEncrypted)
-                    {
 
-                        using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet, certificate,
-                            ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*"))
-                        {
-                            await _connectorStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                            await _connectorStream.FlushAsync();
-                        }
-
-                    }
-                    else
+                    // 10/08/2018 - MAJOR_UPDATE_1_SECURITY
+                    if (ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY) // SSL Layer for Send packet.
                     {
-                        if (isSeedNode)
+                        if (isEncrypted)
                         {
-                            using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(packet + "*"))
+
+                            using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet, certificate,
+                                ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*"))
                             {
                                 await _connectorStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
                                 await _connectorStream.FlushAsync();
                             }
+
                         }
                         else
                         {
-                            using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(packet))
+                            if (isSeedNode)
                             {
-                                await _connectorStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                                await _connectorStream.FlushAsync();
+                                using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(packet + "*"))
+                                {
+                                    await _connectorStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
+                                    await _connectorStream.FlushAsync();
+                                }
                             }
-                        }
+                            else
+                            {
+                                using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(packet))
+                                {
+                                    await _connectorStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
+                                    await _connectorStream.FlushAsync();
+                                }
+                            }
 
+                        }
                     }
                 }
             }
@@ -296,82 +296,80 @@ namespace Xiropht_Connector_All.Seed
 
                 if (ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY) // New Layer for receive packet.
                 {
-                    var bufferPacket = new ClassSeedNodeConnectorObjectPacket();
-                    _connectorStream = new NetworkStream(_connector.Client);
-                    int received = await _connectorStream.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
-
-                    if (received > 0)
+                    using (var bufferPacket = new ClassSeedNodeConnectorObjectPacket())
                     {
-                        bufferPacket.packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
-
-
-                        if (bufferPacket.packet != ClassSeedNodeStatus.SeedError && bufferPacket.packet != ClassSeedNodeStatus.SeedNone)
+                        using (var _connectorStream = new NetworkStream(_connector.Client))
                         {
-                            if (isEncrypted)
+                            int received = await _connectorStream.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
+
+                            if (received > 0)
                             {
+                                bufferPacket.packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
 
-                                if (bufferPacket.packet.Contains("*"))
+
+                                if (bufferPacket.packet != ClassSeedNodeStatus.SeedError && bufferPacket.packet != ClassSeedNodeStatus.SeedNone)
                                 {
-                                    var splitPacket = bufferPacket.packet.Split(new[] { "*" }, StringSplitOptions.None);
-                                    bufferPacket.packet = string.Empty;
-                                    foreach (var packetEach in splitPacket)
+                                    if (isEncrypted)
                                     {
-                                        if (packetEach != null)
-                                        {
-                                            if (!string.IsNullOrEmpty(packetEach))
-                                            {
-                                                if (packetEach.Length > 1)
-                                                {
-                                                    if (packetEach.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
-                                                    {
-                                                        bufferPacket.packet += packetEach.Replace("*", "") + "*";
-                                                    }
-                                                    else
-                                                    {
 
-                                                        bufferPacket.packet += ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace("*", ""), certificate,
-                                                            ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*";
+                                        if (bufferPacket.packet.Contains("*"))
+                                        {
+                                            var splitPacket = bufferPacket.packet.Split(new[] { "*" }, StringSplitOptions.None);
+                                            bufferPacket.packet = string.Empty;
+                                            foreach (var packetEach in splitPacket)
+                                            {
+                                                if (packetEach != null)
+                                                {
+                                                    if (!string.IsNullOrEmpty(packetEach))
+                                                    {
+                                                        if (packetEach.Length > 1)
+                                                        {
+                                                            if (packetEach.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
+                                                            {
+                                                                bufferPacket.packet += packetEach.Replace("*", "") + "*";
+                                                            }
+                                                            else
+                                                            {
+
+                                                                bufferPacket.packet += ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace("*", ""), certificate,
+                                                                    ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*";
+                                                            }
+                                                        }
                                                     }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!bufferPacket.packet.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
+                                            {
+                                                try
+                                                {
+                                                    bufferPacket.packet = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, certificate,
+                                                    ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*";
+                                                }
+                                                catch
+                                                {
+
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                else
+                                if (bufferPacket.packet == ClassSeedNodeCommand.ClassReceiveSeedEnumeration.DisconnectPacket)
                                 {
-                                    if (!bufferPacket.packet.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
-                                    {
-                                        try
-                                        {
-                                            bufferPacket.packet = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, certificate,
-                                            ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*";
-                                        }
-                                        catch
-                                        {
-
-                                        }
-                                    }
+                                    _isConnected = false;
+                                    return ClassSeedNodeStatus.SeedError;
                                 }
+
+                                return bufferPacket.packet;
                             }
                         }
-                        if (bufferPacket.packet == ClassSeedNodeCommand.ClassReceiveSeedEnumeration.DisconnectPacket)
-                        {
-                            _isConnected = false;
-                            return ClassSeedNodeStatus.SeedError;
-                        }
-
-                        return bufferPacket.packet;
                     }
-
                 }
             }
             catch (Exception)
             {
-                _connectorStream?.Close();
-                _connectorStream?.Dispose();
-                _connectorStream = null;
-
-
                 _isConnected = false;
                 return ClassSeedNodeStatus.SeedError;
             }
@@ -412,7 +410,6 @@ namespace Xiropht_Connector_All.Seed
             _isConnected = false;
             _connector?.Close();
             _connector?.Dispose();
-            _connectorStream?.Close();
             Dispose();
         }
     }
