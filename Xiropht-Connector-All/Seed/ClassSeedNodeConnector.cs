@@ -49,13 +49,13 @@ namespace Xiropht_Connector_All.Seed
 
     public class ClassSeedNodeConnectorObjectPacket : IDisposable
     {
-        public char[] buffer;
+        public byte[] buffer;
         public string packet;
         private bool disposed;
 
         public ClassSeedNodeConnectorObjectPacket()
         {
-            buffer = new char[ClassConnectorSetting.MaxNetworkPacketSize];
+            buffer = new byte[ClassConnectorSetting.MaxNetworkPacketSize];
             packet = string.Empty;
         }
 
@@ -88,7 +88,6 @@ namespace Xiropht_Connector_All.Seed
     public class ClassSeedNodeConnector : IDisposable
     {
         private TcpClient _connector;
-        private StreamReader _connectorReader;
         private NetworkStream _connectorStream;
         private bool _isConnected;
         private bool disposed;
@@ -114,7 +113,6 @@ namespace Xiropht_Connector_All.Seed
             if (disposing)
             {
                 _connector = null;
-                _connectorReader = null;
                 _connectorStream = null;
             }
             disposed = true;
@@ -233,6 +231,9 @@ namespace Xiropht_Connector_All.Seed
             }
             try
             {
+
+                _connectorStream = new NetworkStream(_connector.Client);
+
                 // 10/08/2018 - MAJOR_UPDATE_1_SECURITY
                 if (ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY) // SSL Layer for Send packet.
                 {
@@ -242,8 +243,8 @@ namespace Xiropht_Connector_All.Seed
                         using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet, certificate,
                             ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*"))
                         {
-                            await _connector.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                            await _connector.GetStream().FlushAsync();
+                            await _connectorStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
+                            await _connectorStream.FlushAsync();
                         }
 
                     }
@@ -253,16 +254,16 @@ namespace Xiropht_Connector_All.Seed
                         {
                             using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(packet + "*"))
                             {
-                                await _connector.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                                await _connector.GetStream().FlushAsync();
+                                await _connectorStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
+                                await _connectorStream.FlushAsync();
                             }
                         }
                         else
                         {
                             using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(packet))
                             {
-                                await _connector.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                                await _connector.GetStream().FlushAsync();
+                                await _connectorStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
+                                await _connectorStream.FlushAsync();
                             }
                         }
 
@@ -282,7 +283,6 @@ namespace Xiropht_Connector_All.Seed
         }
 
 
-
         /// <summary>
         ///     Listen and return packet from Seed Node.
         /// </summary>
@@ -293,20 +293,16 @@ namespace Xiropht_Connector_All.Seed
         {
             try
             {
-                if (_connectorStream == null)
-                {
-                    _connectorStream = new NetworkStream(_connector.Client);
-                    _connectorReader = new StreamReader(_connectorStream, Encoding.UTF8, true, ClassConnectorSetting.MaxNetworkPacketSize, true);
-                }
 
                 if (ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY) // New Layer for receive packet.
                 {
                     var bufferPacket = new ClassSeedNodeConnectorObjectPacket();
-                    int received = await _connectorReader.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
+                    _connectorStream = new NetworkStream(_connector.Client);
+                    int received = await _connectorStream.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
 
                     if (received > 0)
                     {
-                        bufferPacket.packet = new string(bufferPacket.buffer, 0, received);
+                        bufferPacket.packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
 
 
                         if (bufferPacket.packet != ClassSeedNodeStatus.SeedError && bufferPacket.packet != ClassSeedNodeStatus.SeedNone)
@@ -373,9 +369,6 @@ namespace Xiropht_Connector_All.Seed
             {
                 _connectorStream?.Close();
                 _connectorStream?.Dispose();
-                _connectorReader?.Close();
-                _connectorReader?.Dispose();
-                _connectorReader = null;
                 _connectorStream = null;
 
 
@@ -419,7 +412,6 @@ namespace Xiropht_Connector_All.Seed
             _isConnected = false;
             _connector?.Close();
             _connector?.Dispose();
-            _connectorReader?.Close();
             _connectorStream?.Close();
             Dispose();
         }

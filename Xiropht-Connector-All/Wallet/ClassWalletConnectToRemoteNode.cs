@@ -48,13 +48,13 @@ namespace Xiropht_Connector_All.Wallet
 
     public class ClassWalletConnectToRemoteNodeObjectPacket : IDisposable
     {
-        public char[] buffer;
+        public byte[] buffer;
         public string packet;
         private bool disposed;
 
         public ClassWalletConnectToRemoteNodeObjectPacket()
         {
-            buffer = new char[ClassConnectorSetting.MaxNetworkPacketSize];
+            buffer = new byte[ClassConnectorSetting.MaxNetworkPacketSize];
             packet = string.Empty;
         }
 
@@ -106,7 +106,7 @@ namespace Xiropht_Connector_All.Wallet
         private TcpClient _remoteNodeClient;
         private string _remoteNodeClientType;
         public string RemoteNodeHost;
-        private StreamReader _remoteNodeReader;
+        //private StreamReader _remoteNodeReader;
         public bool RemoteNodeStatus;
         private NetworkStream _remoteNodeStream;
         public int TotalInvalidPacket;
@@ -133,7 +133,7 @@ namespace Xiropht_Connector_All.Wallet
             if (disposing)
             {
                 _remoteNodeClient = null;
-                _remoteNodeReader = null;
+                //_remoteNodeReader = null;
                 _remoteNodeStream = null;
             }
             disposed = true;
@@ -245,17 +245,15 @@ namespace Xiropht_Connector_All.Wallet
         {
             try
             {
-                if (_remoteNodeStream == null)
-                {
-                    _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client);
-                    _remoteNodeReader = new StreamReader(_remoteNodeStream, Encoding.UTF8, true, ClassConnectorSetting.MaxNetworkPacketSize, true);
-                }
+
+                _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client);
+
 
                 var bufferPacket = new ClassWalletConnectToRemoteNodeObjectPacket();
-                int received = await _remoteNodeReader.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
+                int received = await _remoteNodeStream.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
                 if (received > 0)
                 {
-                    return new string(bufferPacket.buffer, 0, received);
+                    return Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
                 }
 
             }
@@ -263,9 +261,6 @@ namespace Xiropht_Connector_All.Wallet
             {
                 _remoteNodeStream?.Close();
                 _remoteNodeStream?.Dispose();
-                _remoteNodeReader?.Close();
-                _remoteNodeReader?.Dispose();
-                _remoteNodeReader = null;
                 _remoteNodeStream = null;
                 _remoteNodeClient?.Close();
                 _remoteNodeClient?.Dispose();
@@ -286,7 +281,7 @@ namespace Xiropht_Connector_All.Wallet
         {
             _remoteNodeClient?.Close();
             _remoteNodeClientType = string.Empty;
-            _remoteNodeReader?.Close();
+            //_remoteNodeReader?.Close();
             _remoteNodeStream?.Close();
             TotalInvalidPacket = 0;
             LastTrustDate = 0;
@@ -315,9 +310,11 @@ namespace Xiropht_Connector_All.Wallet
             }
             try
             {
+                _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client);
+
                 var packetObject = new ClassWalletConnectToRemoteNodeObjectSendPacket(command + "*");
-                await _remoteNodeClient.GetStream().WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                await _remoteNodeClient.GetStream().FlushAsync();
+                await _remoteNodeStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
+                await _remoteNodeStream.FlushAsync();
 
             }
             catch
@@ -399,9 +396,10 @@ namespace Xiropht_Connector_All.Wallet
 
             try
             {
+                _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client);
 
-                await _remoteNodeClient.GetStream().WriteAsync(packet.packetByte, 0, packet.packetByte.Length);
-                await _remoteNodeClient.GetStream().FlushAsync();
+                await _remoteNodeStream.WriteAsync(packet.packetByte, 0, packet.packetByte.Length);
+                await _remoteNodeStream.FlushAsync();
                
             }
             catch (Exception error)
