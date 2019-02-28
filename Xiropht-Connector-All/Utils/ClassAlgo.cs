@@ -167,6 +167,9 @@ namespace Xiropht_Connector_All.Utils
                             cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
                             cryptoStream.FlushFinalBlock();
                             byte[] cipherTextBytes = memoryStream.ToArray();
+
+                            symmetricKey.Clear();
+                            cryptoStream.Clear();
                             return Convert.ToBase64String(cipherTextBytes);
                         }
                     }
@@ -202,6 +205,8 @@ namespace Xiropht_Connector_All.Utils
                         {
                             byte[] plainTextBytes = new byte[cipherTextBytes.Length];
                             int decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
+                            symmetricKey.Clear();
+                            cryptoStream.Clear();
                             return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
                         }
                     }

@@ -13,11 +13,9 @@ namespace Xiropht_Connector_All.Utils
         {
             try
             {
-                using (var pingTestNode = new Ping())
-                {
-                    var replyNode = pingTestNode.Send(host);
-                    if (replyNode.Status == IPStatus.Success) return (int)replyNode.RoundtripTime;
-                }
+                var pingTestNode = new Ping();
+                var replyNode = pingTestNode.Send(host);
+                if (replyNode.Status == IPStatus.Success) return (int) replyNode.RoundtripTime;
             }
             catch
             {

@@ -61,14 +61,12 @@ namespace Xiropht_Connector_All.Utils
         public static string CompressData(string data)
         {
             var byteData = Encoding.UTF8.GetBytes(data);
-            using (MemoryStream output = new MemoryStream())
+            MemoryStream output = new MemoryStream();
+            using (DeflateStream dstream = new DeflateStream(output, CompressionMode.Compress))
             {
-                using (DeflateStream dstream = new DeflateStream(output, CompressionMode.Compress))
-                {
-                    dstream.Write(byteData, 0, byteData.Length);
-                }
-                return Convert.ToBase64String(output.ToArray());
+                dstream.Write(byteData, 0, byteData.Length);
             }
+            return Convert.ToBase64String(output.ToArray());
         }
 
 
@@ -87,22 +85,21 @@ namespace Xiropht_Connector_All.Utils
         /// <returns></returns>
         public static int GetRandomBetween(int minimumValue, int maximumValue)
         {
-            using (RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider())
-            {
-                var randomNumber = new byte[sizeof(int)];
+            RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider();
 
-                Generator.GetBytes(randomNumber);
+            var randomNumber = new byte[sizeof(int)];
 
-                var asciiValueOfRandomCharacter = Convert.ToDouble(randomNumber[0]);
+            Generator.GetBytes(randomNumber);
 
-                var multiplier = Math.Max(0, asciiValueOfRandomCharacter / 255d - 0.00000000001d);
+            var asciiValueOfRandomCharacter = Convert.ToDouble(randomNumber[0]);
 
-                var range = maximumValue - minimumValue + 1;
+            var multiplier = Math.Max(0, asciiValueOfRandomCharacter / 255d - 0.00000000001d);
 
-                var randomValueInRange = Math.Floor(multiplier * range);
+            var range = maximumValue - minimumValue + 1;
 
-                return (int)(minimumValue + randomValueInRange);
-            }
+            var randomValueInRange = Math.Floor(multiplier * range);
+
+            return (int)(minimumValue + randomValueInRange);
         }
 
         /// <summary>
@@ -113,22 +110,21 @@ namespace Xiropht_Connector_All.Utils
         /// <returns></returns>
         public static long GetRandomBetweenLong(long minimumValue, long maximumValue)
         {
-            using (RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider())
-            {
-                var randomNumber = new byte[sizeof(long)];
+            RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider();
 
-                Generator.GetBytes(randomNumber);
+            var randomNumber = new byte[sizeof(long)];
 
-                var asciiValueOfRandomCharacter = Convert.ToDouble(randomNumber[0]);
+            Generator.GetBytes(randomNumber);
 
-                var multiplier = Math.Max(0, asciiValueOfRandomCharacter / 255d - 0.00000000001d);
+            var asciiValueOfRandomCharacter = Convert.ToDouble(randomNumber[0]);
 
-                var range = maximumValue - minimumValue + 1;
+            var multiplier = Math.Max(0, asciiValueOfRandomCharacter / 255d - 0.00000000001d);
 
-                var randomValueInRange = Math.Floor(multiplier * range);
+            var range = maximumValue - minimumValue + 1;
 
-                return (long)(minimumValue + randomValueInRange);
-            }
+            var randomValueInRange = Math.Floor(multiplier * range);
+
+            return (long)(minimumValue + randomValueInRange);
         }
 
         public static CultureInfo GlobalCultureInfo = new CultureInfo("fr-FR");
@@ -205,17 +201,14 @@ namespace Xiropht_Connector_All.Utils
 
         public static string DecompressData(string data)
         {
-            using (MemoryStream input = new MemoryStream(Convert.FromBase64String(data)))
+
+            MemoryStream input = new MemoryStream(Convert.FromBase64String(data));
+            MemoryStream output = new MemoryStream();
+            using (DeflateStream dstream = new DeflateStream(input, CompressionMode.Decompress))
             {
-                using (MemoryStream output = new MemoryStream())
-                {
-                    using (DeflateStream dstream = new DeflateStream(input, CompressionMode.Decompress))
-                    {
-                        dstream.CopyTo(output);
-                    }
-                    return Encoding.UTF8.GetString(output.ToArray());
-                }
+                dstream.CopyTo(output);
             }
+            return Encoding.UTF8.GetString(output.ToArray());
         }
 
 
