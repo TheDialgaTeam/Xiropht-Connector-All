@@ -61,12 +61,14 @@ namespace Xiropht_Connector_All.Utils
         public static string CompressData(string data)
         {
             var byteData = Encoding.UTF8.GetBytes(data);
-            MemoryStream output = new MemoryStream();
-            using (DeflateStream dstream = new DeflateStream(output, CompressionMode.Compress))
+            using (MemoryStream output = new MemoryStream())
             {
-                dstream.Write(byteData, 0, byteData.Length);
+                using (DeflateStream dstream = new DeflateStream(output, CompressionMode.Compress))
+                {
+                    dstream.Write(byteData, 0, byteData.Length);
+                }
+                return Convert.ToBase64String(output.ToArray());
             }
-            return Convert.ToBase64String(output.ToArray());
         }
 
 
@@ -85,21 +87,22 @@ namespace Xiropht_Connector_All.Utils
         /// <returns></returns>
         public static int GetRandomBetween(int minimumValue, int maximumValue)
         {
-            RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider();
+            using (RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider())
+            {
+                var randomNumber = new byte[sizeof(int)];
 
-            var randomNumber = new byte[sizeof(int)];
+                Generator.GetBytes(randomNumber);
 
-            Generator.GetBytes(randomNumber);
+                var asciiValueOfRandomCharacter = Convert.ToDouble(randomNumber[0]);
 
-            var asciiValueOfRandomCharacter = Convert.ToDouble(randomNumber[0]);
+                var multiplier = Math.Max(0, asciiValueOfRandomCharacter / 255d - 0.00000000001d);
 
-            var multiplier = Math.Max(0, asciiValueOfRandomCharacter / 255d - 0.00000000001d);
+                var range = maximumValue - minimumValue + 1;
 
-            var range = maximumValue - minimumValue + 1;
+                var randomValueInRange = Math.Floor(multiplier * range);
 
-            var randomValueInRange = Math.Floor(multiplier * range);
-
-            return (int)(minimumValue + randomValueInRange);
+                return (int)(minimumValue + randomValueInRange);
+            }
         }
 
         /// <summary>
@@ -110,21 +113,22 @@ namespace Xiropht_Connector_All.Utils
         /// <returns></returns>
         public static long GetRandomBetweenLong(long minimumValue, long maximumValue)
         {
-            RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider();
+            using (RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider())
+            {
+                var randomNumber = new byte[sizeof(long)];
 
-            var randomNumber = new byte[sizeof(long)];
+                Generator.GetBytes(randomNumber);
 
-            Generator.GetBytes(randomNumber);
+                var asciiValueOfRandomCharacter = Convert.ToDouble(randomNumber[0]);
 
-            var asciiValueOfRandomCharacter = Convert.ToDouble(randomNumber[0]);
+                var multiplier = Math.Max(0, asciiValueOfRandomCharacter / 255d - 0.00000000001d);
 
-            var multiplier = Math.Max(0, asciiValueOfRandomCharacter / 255d - 0.00000000001d);
+                var range = maximumValue - minimumValue + 1;
 
-            var range = maximumValue - minimumValue + 1;
+                var randomValueInRange = Math.Floor(multiplier * range);
 
-            var randomValueInRange = Math.Floor(multiplier * range);
-
-            return (long)(minimumValue + randomValueInRange);
+                return (long)(minimumValue + randomValueInRange);
+            }
         }
 
         public static CultureInfo GlobalCultureInfo = new CultureInfo("fr-FR");
@@ -201,14 +205,17 @@ namespace Xiropht_Connector_All.Utils
 
         public static string DecompressData(string data)
         {
-
-            MemoryStream input = new MemoryStream(Convert.FromBase64String(data));
-            MemoryStream output = new MemoryStream();
-            using (DeflateStream dstream = new DeflateStream(input, CompressionMode.Decompress))
+            using (MemoryStream input = new MemoryStream(Convert.FromBase64String(data)))
             {
-                dstream.CopyTo(output);
+                using (MemoryStream output = new MemoryStream())
+                {
+                    using (DeflateStream dstream = new DeflateStream(input, CompressionMode.Decompress))
+                    {
+                        dstream.CopyTo(output);
+                    }
+                    return Encoding.UTF8.GetString(output.ToArray());
+                }
             }
-            return Encoding.UTF8.GetString(output.ToArray());
         }
 
 

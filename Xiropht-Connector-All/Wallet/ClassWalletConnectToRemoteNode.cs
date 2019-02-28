@@ -106,9 +106,7 @@ namespace Xiropht_Connector_All.Wallet
         private TcpClient _remoteNodeClient;
         private string _remoteNodeClientType;
         public string RemoteNodeHost;
-        //private StreamReader _remoteNodeReader;
         public bool RemoteNodeStatus;
-        private NetworkStream _remoteNodeStream;
         public int TotalInvalidPacket;
         private bool disposed;
         public long LastTrustDate;
@@ -133,8 +131,6 @@ namespace Xiropht_Connector_All.Wallet
             if (disposing)
             {
                 _remoteNodeClient = null;
-                //_remoteNodeReader = null;
-                _remoteNodeStream = null;
             }
             disposed = true;
         }
@@ -246,22 +242,20 @@ namespace Xiropht_Connector_All.Wallet
             try
             {
 
-                _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client);
-
-
-                var bufferPacket = new ClassWalletConnectToRemoteNodeObjectPacket();
-                int received = await _remoteNodeStream.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
-                if (received > 0)
+                using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
                 {
-                    return Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
+                    using (var bufferPacket = new ClassWalletConnectToRemoteNodeObjectPacket())
+                    {
+                        int received = await _remoteNodeStream.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
+                        if (received > 0)
+                        {
+                            return Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
+                        }
+                    }
                 }
-
             }
             catch (Exception error)
             {
-                _remoteNodeStream?.Close();
-                _remoteNodeStream?.Dispose();
-                _remoteNodeStream = null;
                 _remoteNodeClient?.Close();
                 _remoteNodeClient?.Dispose();
                 RemoteNodeStatus = false;
@@ -281,8 +275,6 @@ namespace Xiropht_Connector_All.Wallet
         {
             _remoteNodeClient?.Close();
             _remoteNodeClientType = string.Empty;
-            //_remoteNodeReader?.Close();
-            _remoteNodeStream?.Close();
             TotalInvalidPacket = 0;
             LastTrustDate = 0;
             Dispose();
@@ -310,11 +302,15 @@ namespace Xiropht_Connector_All.Wallet
             }
             try
             {
-                _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client);
+                using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
+                {
 
-                var packetObject = new ClassWalletConnectToRemoteNodeObjectSendPacket(command + "*");
-                await _remoteNodeStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                await _remoteNodeStream.FlushAsync();
+                    using (var packetObject = new ClassWalletConnectToRemoteNodeObjectSendPacket(command + "*"))
+                    {
+                        await _remoteNodeStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
+                        await _remoteNodeStream.FlushAsync();
+                    }
+                }
 
             }
             catch
@@ -396,10 +392,11 @@ namespace Xiropht_Connector_All.Wallet
 
             try
             {
-                _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client);
-
-                await _remoteNodeStream.WriteAsync(packet.packetByte, 0, packet.packetByte.Length);
-                await _remoteNodeStream.FlushAsync();
+                using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
+                {
+                    await _remoteNodeStream.WriteAsync(packet.packetByte, 0, packet.packetByte.Length);
+                    await _remoteNodeStream.FlushAsync();
+                }
                
             }
             catch (Exception error)
