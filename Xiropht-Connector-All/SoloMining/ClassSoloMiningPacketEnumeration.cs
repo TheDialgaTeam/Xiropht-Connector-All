@@ -34,6 +34,8 @@
             public const string ReceiveAskListBlockMethod = "RECEIVE-ASK-LIST-BLOCK-METHOD";
             public const string ReceiveAskContentBlockMethod = "RECEIVE-ASK-CONTENT-BLOCK-METHOD";
             public const string KeepAlive = "KEEP-ALIVE"; // All phase
+            public const string ShareHashrate = "SEND-MINER-HASHRATE"; // Work only with the solo mining proxy.
+
         }
     }
 }

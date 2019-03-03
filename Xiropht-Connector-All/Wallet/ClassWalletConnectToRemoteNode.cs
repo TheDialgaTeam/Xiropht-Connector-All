@@ -182,6 +182,8 @@ namespace Xiropht_Connector_All.Wallet
 
             RemoteNodeHost = host;
 
+            _remoteNodeClient.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
+
             new Thread(delegate () { EnableCheckConnection(); }).Start();
             
             return true;

@@ -57,6 +57,7 @@
     <Compile Include="Utils\CheckTcp.cs" />
     <Compile Include="Utils\ClassAlgo.cs" />
     <Compile Include="Utils\ClassUtils.cs" />
+    <Compile Include="Utils\TcpClientExtension.cs" />
     <Compile Include="Wallet\ClassWalletCommand.cs" />
     <Compile Include="Wallet\ClassWalletConnect.cs" />
     <Compile Include="Wallet\ClassWalletConnectToRemoteNode.cs" />

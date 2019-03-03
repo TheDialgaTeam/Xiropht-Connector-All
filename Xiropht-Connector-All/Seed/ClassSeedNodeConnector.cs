@@ -143,6 +143,7 @@ namespace Xiropht_Connector_All.Seed
                 }
 
                 _isConnected = true;
+                _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
                 return true;
             }
 
@@ -174,6 +175,7 @@ namespace Xiropht_Connector_All.Seed
             {
                 _isConnected = true;
 
+                _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
 
                 new Thread(delegate () { EnableCheckConnection(); }).Start();
 
