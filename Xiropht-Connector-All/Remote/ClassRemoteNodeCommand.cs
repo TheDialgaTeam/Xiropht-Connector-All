@@ -45,6 +45,9 @@
 
             public const string RemoteCheckTrustedKey = "CHECK-TRUSTED-KEY";
 
+            public const string RemoteAskSchemaTransaction = "ASK-SCHEMA-TRANSACTION";
+
+            public const string RemoteAskSchemaBlock = "ASK-SCHEMA-BLOCK";
 
         }
 
@@ -82,7 +85,6 @@
             /// <summary>
             ///     Command for keep alive connection
             /// </summary>
-
             public const string RemoteKeepAlive = "KEEP-ALIVE";
 
             /// <summary>
@@ -94,6 +96,8 @@
             public const string RemoteSendCheckBlockHash = "SEND-CHECK-BLOCK-HASH";
             public const string RemoteSendCheckTransactionHash = "SEND-CHECK-TRANSACTION-HASH";
             public const string RemoteSendCheckTrustedKey = "SEND-CHECK-TRUSTED-KEY";
+            public const string RemoteSendSchemaTransaction = "SEND-SCHEMA-TRANSACTION";
+            public const string RemoteSendSchemaBlock = "SEND-SCHEMA-BLOCK";
 
         }
     }
