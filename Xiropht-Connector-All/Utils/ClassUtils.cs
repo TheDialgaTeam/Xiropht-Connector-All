@@ -262,7 +262,7 @@ namespace Xiropht_Connector_All.Utils
                 var stateOfConnection = GetState(ClientSocket);
 
 
-                if (stateOfConnection != TcpState.Closed && stateOfConnection != TcpState.CloseWait && stateOfConnection != TcpState.Closing)
+                if (stateOfConnection != TcpState.Closed && stateOfConnection != TcpState.CloseWait && stateOfConnection != TcpState.Closing && stateOfConnection != TcpState.Unknown)
                 {
                     return true;
                 }
@@ -282,7 +282,7 @@ namespace Xiropht_Connector_All.Utils
         {
             var foo = IPGlobalProperties.GetIPGlobalProperties()
               .GetActiveTcpConnections()
-              .SingleOrDefault(x => x.LocalEndPoint.Equals(tcpClient.Client.LocalEndPoint)
+              .FirstOrDefault(x => x.LocalEndPoint.Equals(tcpClient.Client.LocalEndPoint)
                                  && x.RemoteEndPoint.Equals(tcpClient.Client.RemoteEndPoint)
               );
 

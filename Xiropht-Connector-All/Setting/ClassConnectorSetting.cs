@@ -2,6 +2,18 @@
 
 namespace Xiropht_Connector_All.Setting
 {
+    public class ClassConnectorSettingEnumeration
+    {
+        /// <summary>
+        /// List of login types.
+        /// </summary>
+        public const string WalletLoginType = "WALLET";
+        public const string WalletCreateType = "WALLET-CREATE";
+        public const string WalletRestoreType = "WALLET-ASK";
+        public const string RemoteLoginType = "REMOTE";
+        public const string MinerLoginType = "MINER";
+    }
+
     public class ClassConnectorSetting
     {
         public const int SeedNodePort = 18000;
@@ -11,33 +23,22 @@ namespace Xiropht_Connector_All.Setting
         /// <summary>
         ///     UPDATES - First Major Update done at 10/08/2018
         /// </summary>
-        public const bool
-            MAJOR_UPDATE_1 =
-                true; // Implementation of: Timestamp recv transaction (for wallet), link blockchain height for transaction, last block found.
+        public const bool MAJOR_UPDATE_1 = true; // Implementation of: Timestamp recv transaction (for wallet), link blockchain height for transaction, last block found.
 
-        public const bool
-            MAJOR_UPDATE_1_SECURITY = true; // Implementation of: Certificate for include a new layer of protection.
+        public const bool MAJOR_UPDATE_1_SECURITY = true; // Implementation of: Certificate for include a new layer of protection.
 
-        public const int
-            MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE =
-                256; // Size of Certificate encryption [Between tools and seed nodes]
+        public const int MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE = 256; // Size of Certificate encryption [Between tools and seed nodes]
 
-        public const int
-            MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE_ITEM =
-                256;
+        public const int MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE_ITEM = 256;
 
         public const string NETWORK_GENESIS_DEFAULT_KEY = "XIROPHTKEY"; // DEFAULT GENESIS KEY [Small static part of dynamic key encryption between tools and blockchain.]
 
         /// <summary>
         ///     UPDATES - Update done at 17/10/2018
         /// </summary>
-        public static string
-            NETWORK_GENESIS_KEY =
-                "XIROPHTKEY"; // GENESIS KEY [Small static part included on dynamic key encryption between tools and blockchain, updated by the blockchain in real time.]
+        public static string NETWORK_GENESIS_KEY = "XIROPHTKEY"; // GENESIS KEY [Small static part included on dynamic key encryption between tools and blockchain, updated by the blockchain in real time.]
 
-        public const string
-            NETWORK_GENESIS_SECONDARY_KEY =
-                "XIROPHTSEED"; // GENESIS SECONDARY KEY [Layer encryption key included on dynamic certificate key between tools and seed nodes]
+        public const string NETWORK_GENESIS_SECONDARY_KEY = "XIROPHTSEED"; // GENESIS SECONDARY KEY [Layer encryption key included on dynamic certificate key between tools and seed nodes]
 
         public static List<string> SeedNodeIp = new List<string> {"87.98.156.228"};
 
