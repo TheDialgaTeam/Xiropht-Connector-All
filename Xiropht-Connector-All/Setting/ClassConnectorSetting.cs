@@ -40,8 +40,12 @@ namespace Xiropht_Connector_All.Setting
 
         public const string NETWORK_GENESIS_SECONDARY_KEY = "XIROPHTSEED"; // GENESIS SECONDARY KEY [Layer encryption key included on dynamic certificate key between tools and seed nodes]
 
+        public const decimal NETWORK_MINING_ACCURACY_EXPECTED = 80; // 80% average of accuracy from miners expected. Use for calculate network hashrate from network difficulty.
+
         public static List<string> SeedNodeIp = new List<string> {"87.98.156.228"};
 
+        public const decimal MinimumWalletTransactionFee = 0.000010000m;
+        public const decimal MinimumWalletTransactionAnonymousFee = 0.000010000m;
         public const int MaxTimeoutConnect = 5000;
         public const int MaxTimeoutConnectRemoteNode = 500;
         public const int MaxTimeoutSendPacket = 2000;

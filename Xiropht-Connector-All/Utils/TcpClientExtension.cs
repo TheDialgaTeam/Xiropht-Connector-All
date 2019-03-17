@@ -8,10 +8,8 @@ namespace Xiropht_Connector_All.Utils
     {
         public static void SetSocketKeepAliveValues(this TcpClient tcpc, int KeepAliveTime, int KeepAliveInterval)
         {
-
-
-            uint dummy = 0; //lenth = 4
-            byte[] inOptionValues = new byte[Marshal.SizeOf(dummy) * 3]; //size = lenth * 3 = 12
+            uint dummy = 0; 
+            byte[] inOptionValues = new byte[Marshal.SizeOf(dummy) * 3];
             bool OnOff = true;
 
             BitConverter.GetBytes((uint)(OnOff ? 1 : 0)).CopyTo(inOptionValues, 0);
