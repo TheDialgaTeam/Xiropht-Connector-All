@@ -158,16 +158,18 @@ namespace Xiropht_Connector_All.Utils
                     symmetricKey.KeySize = keysize;
                     symmetricKey.Padding = PaddingMode.PKCS7;
                     symmetricKey.Key = keyBytes;
-                    ICryptoTransform encryptor = symmetricKey.CreateEncryptor(keyBytes, initVectorBytes);
-                    using (MemoryStream memoryStream = new MemoryStream())
+                    using (ICryptoTransform encryptor = symmetricKey.CreateEncryptor(keyBytes, initVectorBytes))
                     {
-                        using (CryptoStream cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
+                        using (MemoryStream memoryStream = new MemoryStream())
                         {
-                            byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-                            cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
-                            cryptoStream.FlushFinalBlock();
-                            byte[] cipherTextBytes = memoryStream.ToArray();
-                            return Convert.ToBase64String(cipherTextBytes);
+                            using (CryptoStream cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
+                            {
+                                byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+                                cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
+                                cryptoStream.FlushFinalBlock();
+                                byte[] cipherTextBytes = memoryStream.ToArray();
+                                return Convert.ToBase64String(cipherTextBytes);
+                            }
                         }
                     }
                 }
@@ -181,7 +183,7 @@ namespace Xiropht_Connector_All.Utils
         /// <param name="passPhrase"></param>
         /// <param name="keysize"></param>
         /// <returns></returns>
-        public  string DecryptString(string cipherText, string passPhrase, int keysize)
+        public string DecryptString(string cipherText, string passPhrase, int keysize)
         {
             using (PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, Encoding.UTF8.GetBytes(ClassUtils.FromHex(passPhrase.Substring(0, 8)))))
             {
@@ -194,15 +196,17 @@ namespace Xiropht_Connector_All.Utils
                     symmetricKey.KeySize = keysize;
                     symmetricKey.Padding = PaddingMode.PKCS7;
                     symmetricKey.Key = keyBytes;
-                    ICryptoTransform decryptor = symmetricKey.CreateDecryptor(keyBytes, initVectorBytes);
-                    byte[] cipherTextBytes = Convert.FromBase64String(cipherText);
-                    using (MemoryStream memoryStream = new MemoryStream(cipherTextBytes))
+                    using (ICryptoTransform decryptor = symmetricKey.CreateDecryptor(keyBytes, initVectorBytes))
                     {
-                        using (CryptoStream cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
+                        byte[] cipherTextBytes = Convert.FromBase64String(cipherText);
+                        using (MemoryStream memoryStream = new MemoryStream(cipherTextBytes))
                         {
-                            byte[] plainTextBytes = new byte[cipherTextBytes.Length];
-                            int decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
-                            return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
+                            using (CryptoStream cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
+                            {
+                                byte[] plainTextBytes = new byte[cipherTextBytes.Length];
+                                int decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
+                                return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
+                            }
                         }
                     }
                 }

@@ -1,4 +1,5 @@
 ﻿using System.Net.NetworkInformation;
+using Xiropht_Connector_All.Setting;
 
 namespace Xiropht_Connector_All.Utils
 {
@@ -17,6 +18,10 @@ namespace Xiropht_Connector_All.Utils
                 {
                     var replyNode = pingTestNode.Send(host);
                     if (replyNode.Status == IPStatus.Success) return (int)replyNode.RoundtripTime;
+                    else
+                    {
+                        return ClassConnectorSetting.MaxTimeoutConnectRemoteNode;
+                    }
                 }
             }
             catch
