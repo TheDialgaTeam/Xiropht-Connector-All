@@ -48,6 +48,7 @@
     <Compile Include="Remote\ClassRemoteNodeCommandForWallet.cs" />
     <Compile Include="Remote\ClassRemoteNodeStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RPC\ClassRpcWalletCommand.cs" />
     <Compile Include="Seed\ClassSeedNodeCommand.cs" />
     <Compile Include="Seed\ClassSeedNodeConnector.cs" />
     <Compile Include="Seed\ClassSeedNodeStatus.cs" />

@@ -10,6 +10,7 @@ namespace Xiropht_Connector_All.Setting
         public const string WalletLoginType = "WALLET";
         public const string WalletCreateType = "WALLET-CREATE";
         public const string WalletRestoreType = "WALLET-ASK";
+        public const string WalletTokenType = "WALLET-TOKEN"; // accepted only on seed nodes token port.
         public const string RemoteLoginType = "REMOTE";
         public const string MinerLoginType = "MINER";
     }
@@ -19,6 +20,7 @@ namespace Xiropht_Connector_All.Setting
         public const int SeedNodePort = 18000;
         public const int RemoteNodeHttpPort = 18001;
         public const int RemoteNodePort = 18002;
+        public const int SeedNodeTokenPort = 18003;
 
         /// <summary>
         ///     UPDATES - First Major Update done at 10/08/2018
@@ -46,6 +48,7 @@ namespace Xiropht_Connector_All.Setting
 
         public const decimal MinimumWalletTransactionFee = 0.000010000m;
         public const decimal MinimumWalletTransactionAnonymousFee = 0.000010000m;
+        public const decimal ConstantBlockReward = 10.00000000m;
         public const int MaxTimeoutConnect = 5000;
         public const int MaxTimeoutConnectRemoteNode = 500;
         public const int MaxTimeoutSendPacket = 2000;
