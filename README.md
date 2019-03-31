@@ -20,6 +20,8 @@ This connector contains:
 
 -> Every command lines used by a solo miner.
 
+-> Every command lines used by a wallet connected to the token network system.
+
 -> Every connector class for build a wallet, remote node, solo miner for connect to the network.
 
 -> Every status functions for help you to maintains online your tool.
