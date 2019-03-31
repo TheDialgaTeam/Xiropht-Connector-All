@@ -246,12 +246,15 @@ namespace Xiropht_Connector_All.Wallet
 
                 using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
                 {
-                    using (var bufferPacket = new ClassWalletConnectToRemoteNodeObjectPacket())
+                    using (var bufferedStreamNetwork = new BufferedStream(_remoteNodeStream, ClassConnectorSetting.MaxNetworkPacketSize))
                     {
-                        int received = await _remoteNodeStream.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
-                        if (received > 0)
+                        using (var bufferPacket = new ClassWalletConnectToRemoteNodeObjectPacket())
                         {
-                            return Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
+                            int received = await bufferedStreamNetwork.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
+                            if (received > 0)
+                            {
+                                return Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
+                            }
                         }
                     }
                 }
@@ -306,11 +309,13 @@ namespace Xiropht_Connector_All.Wallet
             {
                 using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
                 {
-
-                    using (var packetObject = new ClassWalletConnectToRemoteNodeObjectSendPacket(command + "*"))
+                    using (var bufferedStream = new BufferedStream(_remoteNodeStream, ClassConnectorSetting.MaxNetworkPacketSize))
                     {
-                        await _remoteNodeStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                        await _remoteNodeStream.FlushAsync();
+                        using (var packetObject = new ClassWalletConnectToRemoteNodeObjectSendPacket(command + "*"))
+                        {
+                            await bufferedStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
+                            await bufferedStream.FlushAsync();
+                        }
                     }
                 }
 
@@ -396,8 +401,11 @@ namespace Xiropht_Connector_All.Wallet
             {
                 using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
                 {
-                    await _remoteNodeStream.WriteAsync(packet.packetByte, 0, packet.packetByte.Length);
-                    await _remoteNodeStream.FlushAsync();
+                    using (var bufferedStreamNetwork = new BufferedStream(_remoteNodeStream, ClassConnectorSetting.MaxNetworkPacketSize))
+                    {
+                        await bufferedStreamNetwork.WriteAsync(packet.packetByte, 0, packet.packetByte.Length);
+                        await bufferedStreamNetwork.FlushAsync();
+                    }
                 }
                
             }
