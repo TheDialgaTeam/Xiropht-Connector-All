@@ -18,6 +18,8 @@
         public const string SendTokenBalance = "SEND-TOKEN-BALANCE";
         public const string SendTokenWalletId = "SEND-TOKEN-WALLET-ID";
         public const string SendTokenWalletAnonymousId = "SEND-TOKEN-WALLET-ANONYMOUS-ID";
+        public const string SendTokenExpired = "SEND-TOKEN-EXPIRED";
+
 
         // Response of transaction.
         public const string SendTokenTransactionConfirmed = "SEND-TOKEN-TRANSACTION-CONFIRMED";

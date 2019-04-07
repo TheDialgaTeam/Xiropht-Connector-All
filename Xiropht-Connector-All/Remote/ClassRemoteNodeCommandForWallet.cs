@@ -30,6 +30,8 @@
             public const string SendRemoteNodeAskBlockHashPerId = "SEND-REMOTE-NODE-BLOCK-HASH-PER-ID";
             public const string SendRemoteNodeAskTransactionHashPerId = "SEND-REMOTE-NODE-TRANSACTION-HASH-PER-ID";
             public const string SendRemoteNodeKeepAlive = "KEEP-ALIVE";
+
+
             /// <summary>
             ///     10/08/2018 - MAJOR_UPDATE_1
             /// </summary>
