@@ -59,6 +59,7 @@ namespace Xiropht_Connector_All.Setting
         public const int MaxDelayRemoteNodeTrust = 30; // 30 seconds.
         public const int MaxDelayRemoteNodeSyncResponse = 10; // 10 seconds.
         public const int MaxDelayRemoteNodeWaitResponse = 5; // 5 seconds.
+        public const int MaxDecimalPlace = 8;
         public const string CoinName = "Xiropht";
         public const string CoinNameMin = "XIR";
         public const string NetworkPhase = "Public Test";
