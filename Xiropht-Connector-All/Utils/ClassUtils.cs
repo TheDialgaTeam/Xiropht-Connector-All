@@ -143,16 +143,16 @@ namespace Xiropht_Connector_All.Utils
             {
                 info = info.Replace(".", ",");
                 var hashrate = float.Parse(info, GlobalCultureInfo);
-                if (hashrate >= 1024)
-                    info = Math.Round(hashrate / 1024, decimalNumberLimit) + " KH/s";
-                else if (hashrate >= 1024000)
-                    info = Math.Round(hashrate / 1024000, decimalNumberLimit) + " MH/s";
-                else if (hashrate >= 1024000000)
-                    info = Math.Round(hashrate / 1024000000, decimalNumberLimit) + " GH/s";
-                else if (hashrate >= 1024000000000)
-                    info = Math.Round(hashrate / 1024000000000, decimalNumberLimit) + " TH/s";
-                else if (hashrate >= 1024000000000000)
-                    info = Math.Round(hashrate / 1024000000000000, decimalNumberLimit) + " PH/s";
+                if (hashrate >= 1000)
+                    info = Math.Round(hashrate / 1000, decimalNumberLimit) + " KH/s";
+                else if (hashrate >= 1000000)
+                    info = Math.Round(hashrate / 1000000, decimalNumberLimit) + " MH/s";
+                else if (hashrate >= 1000000000)
+                    info = Math.Round(hashrate / 1000000000, decimalNumberLimit) + " GH/s";
+                else if (hashrate >= 1000000000000)
+                    info = Math.Round(hashrate / 1000000000000, decimalNumberLimit) + " TH/s";
+                else if (hashrate >= 1000000000000000)
+                    info = Math.Round(hashrate / 1000000000000000, decimalNumberLimit) + " PH/s";
                 else
                     info = hashrate + " H/s";
             }
