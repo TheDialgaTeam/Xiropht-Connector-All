@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Security.Permissions;
 using System.Text;
@@ -90,6 +92,7 @@ namespace Xiropht_Connector_All.Seed
         private TcpClient _connector;
         private bool _isConnected;
         private bool disposed;
+        private string _currentSeedNodeHost;
 
 
         ~ClassSeedNodeConnector()
@@ -143,33 +146,63 @@ namespace Xiropht_Connector_All.Seed
                 }
 
                 _isConnected = true;
+                _currentSeedNodeHost = host;
                 _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
                 return true;
             }
 
-            var success = false;
-            for (var i = 0; i < ClassConnectorSetting.SeedNodeIp.Count; i++)
+            Dictionary<string, int> ListOfSeedNodesSpeed = new Dictionary<string, int>();
+            foreach (var seedNode in ClassConnectorSetting.SeedNodeIp)
             {
-                if (i < ClassConnectorSetting.SeedNodeIp.Count)
+
+                try
                 {
-#if DEBUG
-                    Console.WriteLine("Seed Node Host target: " + ClassConnectorSetting.SeedNodeIp[i]);
-#endif
-                    try
+                    int seedNodeResponseTime = -1;
+                    Task taskCheckSeedNode = Task.Run(() => seedNodeResponseTime = CheckPing.CheckPingHost(seedNode.Key, true));
+                    taskCheckSeedNode.Wait(ClassConnectorSetting.MaxPingDelay);
+                    if (seedNodeResponseTime == -1)
                     {
-                        _connector = new TcpClient();
-                        await _connector.ConnectAsync(ClassConnectorSetting.SeedNodeIp[i], port);
-                        success = true;
-                        _isConnected = true;
-                        break;
+                        seedNodeResponseTime = ClassConnectorSetting.MaxTimeoutConnect;
                     }
-                    catch (Exception error)
-                    {
+#if DEBUG
+                    Console.WriteLine(seedNode.Key + " response time: " + seedNodeResponseTime + " ms.");
+#endif
+                    ListOfSeedNodesSpeed.Add(seedNode.Key, seedNodeResponseTime);
+
+                }
+                catch
+                {
+                    ListOfSeedNodesSpeed.Add(seedNode.Key, ClassConnectorSetting.MaxTimeoutConnect); // Max delay.
+                }
+
+            }
+
+            ListOfSeedNodesSpeed = ListOfSeedNodesSpeed.OrderBy(u => u.Value).ToDictionary(z => z.Key, y => y.Value);
+
+            var success = false;
+
+            foreach (var seedNode in ListOfSeedNodesSpeed)
+            {
+#if DEBUG
+                Console.WriteLine("Seed Node Host target: " + seedNode.Key);
+#endif
+                try
+                {
+                    
+                    _connector = new TcpClient();
+                    await _connector.ConnectAsync(seedNode.Key, port);
+                    success = true;
+                    _isConnected = true;
+                    _currentSeedNodeHost = seedNode.Key;
+                    break;
+                }
+                catch (Exception error)
+                {
 #if DEBUG
                         Console.WriteLine("Error to connect on seed node: " + error.Message);
 #endif
-                    }
                 }
+
             }
             if (success)
             {
@@ -330,6 +363,7 @@ namespace Xiropht_Connector_All.Seed
                                                         {
                                                             if (packetEach.Length > 1)
                                                             {
+
                                                                 if (packetEach.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
                                                                 {
                                                                     bufferPacket.packet += packetEach.Replace("*", "") + "*";
@@ -337,10 +371,27 @@ namespace Xiropht_Connector_All.Seed
                                                                 else
                                                                 {
 
-                                                                    bufferPacket.packet += ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace("*", ""), certificate,
-                                                                        ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*";
+                                                                    string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace("*", ""), certificate,
+                                                                        ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE);
+
+                                                                    if (packetDecrypt.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
+                                                                    {
+                                                                        var packetNewSeedNode = packetDecrypt.Replace(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode, "");
+                                                                        var splitPacketNewSeedNode = packetNewSeedNode.Split(new[] { ";" }, StringSplitOptions.None);
+                                                                        var newSeedNodeHost = splitPacketNewSeedNode[0];
+                                                                        var newSeedNodeCountry = splitPacketNewSeedNode[1];
+                                                                        if(!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
+                                                                        {
+                                                                            ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, newSeedNodeCountry);
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        bufferPacket.packet += packetDecrypt + "*";
+                                                                    }
                                                                 }
                                                             }
+                                                            
                                                         }
                                                     }
                                                 }
@@ -351,8 +402,24 @@ namespace Xiropht_Connector_All.Seed
                                                 {
                                                     try
                                                     {
-                                                        bufferPacket.packet = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, certificate,
-                                                        ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*";
+                                                        string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, certificate,
+                                                        ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE);
+
+                                                        if (bufferPacket.packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
+                                                        {
+                                                            var packetNewSeedNode = packetDecrypt.Replace(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode, "");
+                                                            var splitPacketNewSeedNode = packetNewSeedNode.Split(new[] { ";" }, StringSplitOptions.None);
+                                                            var newSeedNodeHost = splitPacketNewSeedNode[0];
+                                                            var newSeedNodeCountry = splitPacketNewSeedNode[1];
+                                                            if (!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
+                                                            {
+                                                                ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, newSeedNodeCountry);
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            bufferPacket.packet = packetDecrypt + "*";
+                                                        }
                                                     }
                                                     catch
                                                     {
@@ -409,12 +476,22 @@ namespace Xiropht_Connector_All.Seed
         }
 
         /// <summary>
+        /// Return the current seed node host used.
+        /// </summary>
+        /// <returns></returns>
+        public string ReturnCurrentSeedNodeHost()
+        {
+            return _currentSeedNodeHost;
+        }
+
+        /// <summary>
         ///     Disconnect to Seed Node.
         /// </summary>
         public void DisconnectToSeed()
         {
             ClassConnectorSetting.NETWORK_GENESIS_KEY = ClassConnectorSetting.NETWORK_GENESIS_DEFAULT_KEY;
             _isConnected = false;
+            _currentSeedNodeHost = string.Empty;
             _connector?.Close();
             _connector?.Dispose();
             Dispose();

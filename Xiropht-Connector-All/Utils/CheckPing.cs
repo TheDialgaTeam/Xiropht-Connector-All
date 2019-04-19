@@ -10,7 +10,7 @@ namespace Xiropht_Connector_All.Utils
         /// </summary>
         /// <param name="host"></param>
         /// <returns></returns>
-        public static int CheckPingHost(string host)
+        public static int CheckPingHost(string host, bool checkSeed = false)
         {
             try
             {
@@ -19,12 +19,28 @@ namespace Xiropht_Connector_All.Utils
                     var replyNode = pingTestNode.Send(host);
                     if (replyNode.Status == IPStatus.Success) return (int)replyNode.RoundtripTime;
                     else
-                        return ClassConnectorSetting.MaxTimeoutConnectRemoteNode;
+                    {
+                        if (checkSeed)
+                        {
+                            return ClassConnectorSetting.MaxTimeoutConnect;
+                        }
+                        else
+                        {
+                            return ClassConnectorSetting.MaxTimeoutConnectRemoteNode;
+                        }
+                    }
                 }
             }
             catch
             {
-                return ClassConnectorSetting.MaxTimeoutConnectRemoteNode;
+                if (checkSeed)
+                {
+                    return ClassConnectorSetting.MaxTimeoutConnect;
+                }
+                else
+                {
+                    return ClassConnectorSetting.MaxTimeoutConnectRemoteNode;
+                }
             }
         }
     }

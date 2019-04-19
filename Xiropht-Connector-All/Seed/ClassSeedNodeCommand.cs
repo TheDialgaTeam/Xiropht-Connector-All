@@ -20,6 +20,7 @@
         public class ClassReceiveSeedEnumeration
         {
             public const string WalletSendRemoteNode = "WALLET-SEND-REMOTE-NODE";
+            public const string WalletSendSeedNode = "WALLET-SEND-SEED-NODE";
             public const string RemoteSendOwnIP = "REMOTE-SEND-OWN-IP";
             public const string DisconnectPacket = "DISCONNECT";
             public const string WalletResultMaxSupply = "WALLET-RESULT-MAX-SUPPLY";

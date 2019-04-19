@@ -44,12 +44,17 @@ namespace Xiropht_Connector_All.Setting
 
         public const decimal NETWORK_MINING_ACCURACY_EXPECTED = 80; // 80% average of accuracy from miners expected. Use for calculate network hashrate from network difficulty.
 
-        public static List<string> SeedNodeIp = new List<string> {"87.98.156.228"};
+        public static Dictionary<string, string> SeedNodeIp = new Dictionary<string, string>
+        {
+            {"87.98.156.228", "FR" },
+            {"66.70.227.204", "CA" }
+        };
 
         public const decimal MinimumWalletTransactionFee = 0.000010000m;
         public const decimal MinimumWalletTransactionAnonymousFee = 0.000010000m;
         public const decimal ConstantBlockReward = 10.00000000m;
         public const int MaxTimeoutConnect = 5000;
+        public const int MaxPingDelay = 1000;
         public const int MaxTimeoutConnectRemoteNode = 500;
         public const int MaxTimeoutSendPacket = 2000;
         public const int MaxTimeoutConnectLocalhostRemoteNode = 100;
