@@ -169,7 +169,11 @@ namespace Xiropht_Connector_All.Wallet
             {
                 RemoteNodeStatus = true;
                 _remoteNodeClient = new TcpClient();
-                await ConnectToTarget(host, port);
+                if(!await ConnectToTarget(host, port))
+                {
+                    RemoteNodeStatus = false;
+                    return false;
+                }
             }
             catch (Exception error)
             {

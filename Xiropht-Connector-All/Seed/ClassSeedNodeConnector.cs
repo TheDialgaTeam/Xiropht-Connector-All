@@ -190,10 +190,13 @@ namespace Xiropht_Connector_All.Seed
                 {
                     
                     _connector = new TcpClient();
-                    await _connector.ConnectAsync(seedNode.Key, port);
-                    success = true;
-                    _isConnected = true;
-                    _currentSeedNodeHost = seedNode.Key;
+                    if (_connector.ConnectAsync(seedNode.Key, port).Wait(ClassConnectorSetting.MaxTimeoutConnect))
+                    {
+                        success = true;
+                        _isConnected = true;
+                        _currentSeedNodeHost = seedNode.Key;
+                    }
+
                     break;
                 }
                 catch (Exception error)
