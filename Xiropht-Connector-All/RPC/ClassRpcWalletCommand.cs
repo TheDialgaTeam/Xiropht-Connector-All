@@ -10,6 +10,7 @@
         public const string TokenAskWalletId = "TOKEN-ASK-WALLET-ID";
         public const string TokenAskWalletAnonymousId = "TOKEN-ASK-WALLET-ANONYMOUS-ID";
         public const string TokenAskWalletSendTransaction = "TOKEN-ASK-WALLET-SEND-TRANSACTION";
+        public const string TokenCheckWalletAddressExist = "TOKEN-CHECK-WALLET-ADDRESS-EXIST";
 
         /// <summary>
         /// Reponse.
@@ -19,7 +20,8 @@
         public const string SendTokenWalletId = "SEND-TOKEN-WALLET-ID";
         public const string SendTokenWalletAnonymousId = "SEND-TOKEN-WALLET-ANONYMOUS-ID";
         public const string SendTokenExpired = "SEND-TOKEN-EXPIRED";
-
+        public const string SendTokenCheckWalletAddressValid = "SEND-TOKEN-CHECK-WALLET-ADDRESS-VALID";
+        public const string SendTokenCheckWalletAddressInvalid = "SEND-TOKEN-CHECK-WALLET-ADDRESS-INVALID";
 
         // Response of transaction.
         public const string SendTokenTransactionConfirmed = "SEND-TOKEN-TRANSACTION-CONFIRMED";
