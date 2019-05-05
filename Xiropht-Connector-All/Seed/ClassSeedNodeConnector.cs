@@ -195,9 +195,9 @@ namespace Xiropht_Connector_All.Seed
                         success = true;
                         _isConnected = true;
                         _currentSeedNodeHost = seedNode.Key;
+                        break;
                     }
 
-                    break;
                 }
                 catch (Exception error)
                 {
