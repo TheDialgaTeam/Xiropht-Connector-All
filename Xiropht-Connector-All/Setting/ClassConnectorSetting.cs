@@ -69,6 +69,5 @@ namespace Xiropht_Connector_All.Setting
         public const int MaxWalletAddressSize = 96;
         public const string CoinName = "Xiropht";
         public const string CoinNameMin = "XIR";
-        public const string NetworkPhase = "Public Test";
     }
 }
