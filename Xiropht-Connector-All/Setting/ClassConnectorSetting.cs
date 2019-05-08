@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Xiropht_Connector_All.Setting
 {
@@ -50,6 +51,12 @@ namespace Xiropht_Connector_All.Setting
             {"66.70.227.204", "CA" }
         };
 
+        public static Dictionary<string, Tuple<int, long>> SeedNodeDisconnectScore = new Dictionary<string, Tuple<int, long>>
+        {
+            {"87.98.156.228", new Tuple<int, long>(0, 0)},
+            {"66.70.227.204", new Tuple<int, long>(0, 0)}
+        };
+
         public const decimal MinimumWalletTransactionFee = 0.000010000m;
         public const decimal MinimumWalletTransactionAnonymousFee = 0.000010000m;
         public const decimal ConstantBlockReward = 10.00000000m;
@@ -67,6 +74,8 @@ namespace Xiropht_Connector_All.Setting
         public const int MaxDecimalPlace = 8;
         public const int MinWalletAddressSize = 48;
         public const int MaxWalletAddressSize = 96;
+        public const int SeedNodeMaxDisconnection = 5; // Max disconnection before received.
+        public const int SeedNodeMaxKeepAliveDisconnection = 10; // Keep alive total disconnection pending 10 seconds.
         public const string CoinName = "Xiropht";
         public const string CoinNameMin = "XIR";
     }

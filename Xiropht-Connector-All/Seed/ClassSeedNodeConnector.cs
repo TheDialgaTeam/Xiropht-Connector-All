@@ -180,7 +180,7 @@ namespace Xiropht_Connector_All.Seed
             ListOfSeedNodesSpeed = ListOfSeedNodesSpeed.OrderBy(u => u.Value).ToDictionary(z => z.Key, y => y.Value);
 
             var success = false;
-
+            var seedNodeTested = false;
             foreach (var seedNode in ListOfSeedNodesSpeed)
             {
 #if DEBUG
@@ -188,14 +188,27 @@ namespace Xiropht_Connector_All.Seed
 #endif
                 try
                 {
-                    
-                    _connector = new TcpClient();
-                    if (_connector.ConnectAsync(seedNode.Key, port).Wait(ClassConnectorSetting.MaxTimeoutConnect))
+                    if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(seedNode.Key))
                     {
-                        success = true;
-                        _isConnected = true;
-                        _currentSeedNodeHost = seedNode.Key;
-                        break;
+                        int totalDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item1;
+                        long lastDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item2;
+                        if (lastDisconnection + ClassConnectorSetting.SeedNodeMaxKeepAliveDisconnection < DateTimeOffset.Now.ToUnixTimeSeconds())
+                        {
+                            totalDisconnection = 0;
+                            ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection, lastDisconnection);
+                        }
+                        if (totalDisconnection < ClassConnectorSetting.SeedNodeMaxDisconnection)
+                        {
+                            _connector = new TcpClient();
+                            seedNodeTested = true;
+                            if (_connector.ConnectAsync(seedNode.Key, port).Wait(ClassConnectorSetting.MaxTimeoutConnect))
+                            {
+                                success = true;
+                                _isConnected = true;
+                                _currentSeedNodeHost = seedNode.Key;
+                                break;
+                            }
+                        }
                     }
 
                 }
@@ -206,6 +219,16 @@ namespace Xiropht_Connector_All.Seed
 #endif
                 }
 
+            }
+            if (!seedNodeTested) // Clean up just in case if every seed node return too much disconnection saved in their counter.
+            {
+                foreach(var seednode in ClassConnectorSetting.SeedNodeIp)
+                {
+                    if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(seednode.Key))
+                    {
+                        ClassConnectorSetting.SeedNodeDisconnectScore[seednode.Key] = new Tuple<int, long>(0, 0);
+                    }
+                }
             }
             if (success)
             {
@@ -387,6 +410,10 @@ namespace Xiropht_Connector_All.Seed
                                                                         {
                                                                             ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, newSeedNodeCountry);
                                                                         }
+                                                                        if (!ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(newSeedNodeHost))
+                                                                        {
+                                                                            ClassConnectorSetting.SeedNodeDisconnectScore.Add(newSeedNodeHost, new Tuple<int, long>(0, 0));
+                                                                        }
                                                                     }
                                                                     else
                                                                     {
@@ -417,6 +444,10 @@ namespace Xiropht_Connector_All.Seed
                                                             if (!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
                                                             {
                                                                 ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, newSeedNodeCountry);
+                                                            }
+                                                            if (!ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(newSeedNodeHost))
+                                                            {
+                                                                ClassConnectorSetting.SeedNodeDisconnectScore.Add(newSeedNodeHost, new Tuple<int, long>(0, 0));
                                                             }
                                                         }
                                                         else
@@ -492,6 +523,14 @@ namespace Xiropht_Connector_All.Seed
         /// </summary>
         public void DisconnectToSeed()
         {
+            if (!string.IsNullOrEmpty(_currentSeedNodeHost))
+            {
+                if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(_currentSeedNodeHost))
+                {
+                    int totalDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[_currentSeedNodeHost].Item1 + 1;
+                    ClassConnectorSetting.SeedNodeDisconnectScore[_currentSeedNodeHost] = new Tuple<int, long>(totalDisconnection, DateTimeOffset.Now.ToUnixTimeSeconds());
+                }
+            }
             ClassConnectorSetting.NETWORK_GENESIS_KEY = ClassConnectorSetting.NETWORK_GENESIS_DEFAULT_KEY;
             _isConnected = false;
             _currentSeedNodeHost = string.Empty;
