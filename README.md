@@ -29,3 +29,7 @@ This connector contains:
 Every importants functions are commented, I think everything is propertly done to be understand easily.
 
 Do not hesitate to ask questions.
+
+**Developers:**
+
+- Xiropht (Sam Segura)
