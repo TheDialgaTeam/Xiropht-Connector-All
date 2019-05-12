@@ -208,6 +208,10 @@ namespace Xiropht_Connector_All.Seed
                                 _currentSeedNodeHost = seedNode.Key;
                                 break;
                             }
+                            else
+                            { 
+                                ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection+1, DateTimeOffset.Now.ToUnixTimeSeconds());
+                            }
                         }
                     }
 

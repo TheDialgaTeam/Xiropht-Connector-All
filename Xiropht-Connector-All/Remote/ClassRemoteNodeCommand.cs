@@ -11,6 +11,8 @@
 
             public const string RemoteAskTransactionPerId = "ASK-TRANSACTION-PER-ID";
 
+            public const string RemoteAskTransactionPerRange = "ASK-TRANSACTION-PER-RANGE";
+
 
             /// <summary>
             ///     Command for blockchain status
