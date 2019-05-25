@@ -162,7 +162,15 @@ namespace Xiropht_Connector_All.Wallet
         /// <returns></returns>
         public async Task<bool> ConnectToRemoteNodeAsync(string host, int port, bool isLinux = false)
         {
-            _remoteNodeClient?.Close();
+            try
+            {
+                _remoteNodeClient?.Close();
+            }
+            catch
+            {
+
+            }
+            RemoteNodeHost = host;
             TotalInvalidPacket = 0;
             LastTrustDate = 0;
             try
