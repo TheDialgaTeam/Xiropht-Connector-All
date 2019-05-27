@@ -125,6 +125,8 @@ namespace Xiropht_Connector_All.Seed
         /// <returns></returns>
         public async Task<bool> StartConnectToSeedAsync(string host, int port = ClassConnectorSetting.SeedNodePort, bool isLinux = false)
         {
+            MalformedPacket = string.Empty;
+
             if (!string.IsNullOrEmpty(host))
             {
 #if DEBUG
@@ -350,6 +352,9 @@ namespace Xiropht_Connector_All.Seed
         }
 
 
+        private string MalformedPacket;
+
+
         /// <summary>
         ///     Listen and return packet from Seed Node.
         /// </summary>
@@ -383,6 +388,11 @@ namespace Xiropht_Connector_All.Seed
 
                                             if (bufferPacket.packet.Contains("*"))
                                             {
+                                                if (!string.IsNullOrEmpty(MalformedPacket))
+                                                {
+                                                    bufferPacket.packet = MalformedPacket + bufferPacket.packet;
+                                                    MalformedPacket = string.Empty;
+                                                }
                                                 var splitPacket = bufferPacket.packet.Split(new[] { "*" }, StringSplitOptions.None);
                                                 bufferPacket.packet = string.Empty;
                                                 foreach (var packetEach in splitPacket)
@@ -439,6 +449,7 @@ namespace Xiropht_Connector_All.Seed
                                                         string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, certificate,
                                                         ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE);
 
+
                                                         if (bufferPacket.packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
                                                         {
                                                             var packetNewSeedNode = packetDecrypt.Replace(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode, "");
@@ -456,8 +467,20 @@ namespace Xiropht_Connector_All.Seed
                                                         }
                                                         else
                                                         {
-                                                            bufferPacket.packet = packetDecrypt + "*";
+                                                            if (packetDecrypt != ClassAlgoErrorEnumeration.AlgoError)
+                                                            {
+                                                                bufferPacket.packet = packetDecrypt + "*";
+                                                            }
+                                                            else
+                                                            {
+                                                                if (MalformedPacket.Length - 1 >= int.MaxValue || MalformedPacket.Length + bufferPacket.packet.Length >= int.MaxValue)
+                                                                {
+                                                                    MalformedPacket = string.Empty;
+                                                                }
+                                                                MalformedPacket += bufferPacket.packet;
+                                                            }
                                                         }
+                                                       
                                                     }
                                                     catch
                                                     {
@@ -538,6 +561,7 @@ namespace Xiropht_Connector_All.Seed
             ClassConnectorSetting.NETWORK_GENESIS_KEY = ClassConnectorSetting.NETWORK_GENESIS_DEFAULT_KEY;
             _isConnected = false;
             _currentSeedNodeHost = string.Empty;
+            MalformedPacket = string.Empty;
             _connector?.Close();
             _connector?.Dispose();
             Dispose();

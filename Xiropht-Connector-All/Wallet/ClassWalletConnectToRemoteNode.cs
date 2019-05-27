@@ -162,6 +162,8 @@ namespace Xiropht_Connector_All.Wallet
         /// <returns></returns>
         public async Task<bool> ConnectToRemoteNodeAsync(string host, int port, bool isLinux = false)
         {
+            MalformedPacket = string.Empty;
+
             try
             {
                 _remoteNodeClient?.Close();
@@ -247,6 +249,9 @@ namespace Xiropht_Connector_All.Wallet
 
         }
 
+
+        private string MalformedPacket;
+
         /// <summary>
         ///     Listen network of remote node.
         /// </summary>
@@ -265,7 +270,24 @@ namespace Xiropht_Connector_All.Wallet
                             int received = await bufferedStreamNetwork.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
                             if (received > 0)
                             {
-                                return Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
+                                string packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
+                                if (packet.Contains("*"))
+                                {
+                                    if (!string.IsNullOrEmpty(MalformedPacket))
+                                    {
+                                        packet = MalformedPacket + packet;
+                                        MalformedPacket = string.Empty;
+                                    }
+                                    return packet;
+                                }
+                                else
+                                {
+                                    if (MalformedPacket.Length -1 >= int.MaxValue || MalformedPacket.Length + packet.Length >= int.MaxValue)
+                                    {
+                                        MalformedPacket = string.Empty;
+                                    }
+                                    MalformedPacket += packet;
+                                }
                             }
                         }
                     }
@@ -290,6 +312,7 @@ namespace Xiropht_Connector_All.Wallet
         /// </summary>
         public void DisconnectRemoteNodeClient()
         {
+            MalformedPacket = string.Empty;
             _remoteNodeClient?.Close();
             _remoteNodeClientType = string.Empty;
             TotalInvalidPacket = 0;
