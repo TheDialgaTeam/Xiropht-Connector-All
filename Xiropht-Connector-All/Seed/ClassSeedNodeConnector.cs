@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading;
@@ -93,6 +94,8 @@ namespace Xiropht_Connector_All.Seed
         private bool _isConnected;
         private bool disposed;
         private string _currentSeedNodeHost;
+        private byte[] AesIvCertificate;
+        private byte[] AesSaltCertificate;
 
 
         ~ClassSeedNodeConnector()
@@ -296,7 +299,7 @@ namespace Xiropht_Connector_All.Seed
             }
             try
             {
-
+                
                 using(var _connectorStream = new NetworkStream(_connector.Client))
                 {
                     using (var bufferedNetworkStream = new BufferedStream(_connectorStream, ClassConnectorSetting.MaxNetworkPacketSize))
@@ -306,9 +309,15 @@ namespace Xiropht_Connector_All.Seed
                         {
                             if (isEncrypted)
                             {
-
-                                using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet, certificate,
-                                    ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE) + "*"))
+                                if (AesIvCertificate == null)
+                                {
+                                    using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate, Encoding.UTF8.GetBytes(ClassUtils.FromHex(certificate.Substring(0, 8)))))
+                                    {
+                                        AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8); 
+                                        AesSaltCertificate = password.GetBytes(16);
+                                    }
+                                }
+                                using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet, ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate) + "*"))
                                 {
                                     await bufferedNetworkStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
                                     await bufferedNetworkStream.FlushAsync();
@@ -385,7 +394,14 @@ namespace Xiropht_Connector_All.Seed
                                     {
                                         if (isEncrypted)
                                         {
-
+                                            if (AesIvCertificate == null)
+                                            {
+                                                using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate, Encoding.UTF8.GetBytes(ClassUtils.FromHex(certificate.Substring(0, 8)))))
+                                                {
+                                                    AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
+                                                    AesSaltCertificate = password.GetBytes(16);
+                                                }
+                                            }
                                             if (bufferPacket.packet.Contains("*"))
                                             {
                                                 if (!string.IsNullOrEmpty(MalformedPacket))
@@ -411,8 +427,7 @@ namespace Xiropht_Connector_All.Seed
                                                                 else
                                                                 {
 
-                                                                    string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace("*", ""), certificate,
-                                                                        ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE);
+                                                                    string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace("*", ""), ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate);
 
                                                                     if (packetDecrypt.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
                                                                     {
@@ -446,8 +461,7 @@ namespace Xiropht_Connector_All.Seed
                                                 {
                                                     try
                                                     {
-                                                        string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, certificate,
-                                                        ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE);
+                                                        string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate);
 
 
                                                         if (bufferPacket.packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
@@ -562,6 +576,8 @@ namespace Xiropht_Connector_All.Seed
             _isConnected = false;
             _currentSeedNodeHost = string.Empty;
             MalformedPacket = string.Empty;
+            AesIvCertificate = null;
+            AesSaltCertificate = null;
             _connector?.Close();
             _connector?.Dispose();
             Dispose();

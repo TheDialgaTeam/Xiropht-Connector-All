@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Xiropht_Connector_All.Seed;
 using Xiropht_Connector_All.Setting;
@@ -44,6 +46,8 @@ namespace Xiropht_Connector_All.Wallet
         public string WalletKey { get; set; }
         public string WalletAmount { get; set; }
         public string WalletPhase { get; set; }
+        private byte[] AesIvCertificate;
+        private byte[] AesSaltCertificate;
 
         /// <summary>
         ///     Can select the wallet phase for network (login, create).
@@ -130,9 +134,15 @@ namespace Xiropht_Connector_All.Wallet
                 case ClassWalletPhase.Login:
                     return packet;
                 default:
-                    return ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet + "|" + ClassUtils.DateUnixTimeNowSecond(),
-                        WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY,
-                        ClassWalletNetworkSetting.KeySize); // AES
+                    if (AesIvCertificate == null)
+                    {
+                        using (PasswordDeriveBytes password = new PasswordDeriveBytes(WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY, Encoding.UTF8.GetBytes(ClassUtils.FromHex((WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY).Substring(0, 8)))))
+                        {
+                            AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
+                            AesSaltCertificate = password.GetBytes(16);
+                        }
+                    }
+                    return ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet + "|" + ClassUtils.DateUnixTimeNowSecond(), ClassWalletNetworkSetting.KeySize, AesIvCertificate, AesSaltCertificate); // AES
             }
         }
 
@@ -153,9 +163,15 @@ namespace Xiropht_Connector_All.Wallet
                 case ClassWalletPhase.Login:
                     return packet;
                 default:
-                    return ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packet,
-                        WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY,
-                        ClassWalletNetworkSetting.KeySize); // AES
+                    if (AesIvCertificate == null)
+                    {
+                        using (PasswordDeriveBytes password = new PasswordDeriveBytes(WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY, Encoding.UTF8.GetBytes(ClassUtils.FromHex((WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY).Substring(0, 8)))))
+                        {
+                            AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
+                            AesSaltCertificate = password.GetBytes(16);
+                        }
+                    }
+                    return ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packet, ClassWalletNetworkSetting.KeySize, AesIvCertificate, AesSaltCertificate); // AES
             }
         }
     }
