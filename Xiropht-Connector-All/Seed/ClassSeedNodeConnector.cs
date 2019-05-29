@@ -194,7 +194,7 @@ namespace Xiropht_Connector_All.Seed
                     {
                         int totalDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item1;
                         long lastDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item2;
-                        if (lastDisconnection + ClassConnectorSetting.SeedNodeMaxKeepAliveDisconnection < DateTimeOffset.Now.ToUnixTimeSeconds())
+                        if (lastDisconnection + ClassConnectorSetting.SeedNodeMaxKeepAliveDisconnection < ClassUtils.DateUnixTimeNowSecond())
                         {
                             totalDisconnection = 0;
                             ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection, lastDisconnection);
@@ -212,7 +212,7 @@ namespace Xiropht_Connector_All.Seed
                             }
                             else
                             { 
-                                ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection+1, DateTimeOffset.Now.ToUnixTimeSeconds());
+                                ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection+1, ClassUtils.DateUnixTimeNowSecond());
                             }
                         }
                     }
@@ -473,7 +473,7 @@ namespace Xiropht_Connector_All.Seed
                                                             }
                                                             else
                                                             {
-                                                                if (MalformedPacket.Length - 1 >= int.MaxValue || MalformedPacket.Length + bufferPacket.packet.Length >= int.MaxValue)
+                                                                if (MalformedPacket.Length - 1 >= int.MaxValue || (long)(MalformedPacket.Length + bufferPacket.packet.Length) >= int.MaxValue)
                                                                 {
                                                                     MalformedPacket = string.Empty;
                                                                 }
@@ -555,7 +555,7 @@ namespace Xiropht_Connector_All.Seed
                 if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(_currentSeedNodeHost))
                 {
                     int totalDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[_currentSeedNodeHost].Item1 + 1;
-                    ClassConnectorSetting.SeedNodeDisconnectScore[_currentSeedNodeHost] = new Tuple<int, long>(totalDisconnection, DateTimeOffset.Now.ToUnixTimeSeconds());
+                    ClassConnectorSetting.SeedNodeDisconnectScore[_currentSeedNodeHost] = new Tuple<int, long>(totalDisconnection, ClassUtils.DateUnixTimeNowSecond());
                 }
             }
             ClassConnectorSetting.NETWORK_GENESIS_KEY = ClassConnectorSetting.NETWORK_GENESIS_DEFAULT_KEY;

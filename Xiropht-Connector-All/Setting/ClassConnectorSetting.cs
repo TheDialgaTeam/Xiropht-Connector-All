@@ -77,6 +77,6 @@ namespace Xiropht_Connector_All.Setting
         public const int SeedNodeMaxDisconnection = 5; // Max disconnection before received.
         public const int SeedNodeMaxKeepAliveDisconnection = 60; // Keep alive total disconnection pending 60 seconds.
         public const string CoinName = "Xiropht";
-        public const string CoinNameMin = "XIR";
+        public const string CoinNameMin = "XIRO";
     }
 }

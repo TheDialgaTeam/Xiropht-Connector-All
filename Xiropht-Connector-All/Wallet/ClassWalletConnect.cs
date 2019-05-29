@@ -130,7 +130,7 @@ namespace Xiropht_Connector_All.Wallet
                 case ClassWalletPhase.Login:
                     return packet;
                 default:
-                    return ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet + "|" + DateTimeOffset.Now.ToUnixTimeSeconds(),
+                    return ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet + "|" + ClassUtils.DateUnixTimeNowSecond(),
                         WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY,
                         ClassWalletNetworkSetting.KeySize); // AES
             }

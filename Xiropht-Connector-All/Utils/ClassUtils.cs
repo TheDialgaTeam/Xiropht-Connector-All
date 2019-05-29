@@ -171,6 +171,18 @@ namespace Xiropht_Connector_All.Utils
             return string.Format(info, GlobalCultureInfo);
         }
 
+        public static long DateUnixTimeNowSecond()
+        {
+            var timeSpan = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0));
+            return (long)timeSpan.TotalSeconds;
+        }
+
+        public static long DateUnixTimeNowSecondConvertDate(DateTime date)
+        {
+            var timeSpan = (DateTime.UtcNow - date);
+            return (long)timeSpan.TotalSeconds;
+        }
+
         /// <summary>
         ///     Can clone a list object.
         /// </summary>
