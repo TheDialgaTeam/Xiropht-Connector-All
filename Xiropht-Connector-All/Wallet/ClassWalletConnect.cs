@@ -174,5 +174,14 @@ namespace Xiropht_Connector_All.Wallet
                     return ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packet, ClassWalletNetworkSetting.KeySize, AesIvCertificate, AesSaltCertificate); // AES
             }
         }
+
+        public void UpdateWalletIv()
+        {
+            using (PasswordDeriveBytes password = new PasswordDeriveBytes(WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY, Encoding.UTF8.GetBytes(ClassUtils.FromHex((WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY).Substring(0, 8)))))
+            {
+                AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
+                AesSaltCertificate = password.GetBytes(16);
+            }
+        }
     }
 }
