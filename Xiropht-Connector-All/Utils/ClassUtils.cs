@@ -60,7 +60,7 @@ namespace Xiropht_Connector_All.Utils
 
         public static string CompressData(string data)
         {
-            var byteData = Encoding.UTF8.GetBytes(data);
+            var byteData = ClassUtils.GetByteArrayFromString(data);
             using (MemoryStream output = new MemoryStream())
             {
                 using (DeflateStream dstream = new DeflateStream(output, CompressionMode.Compress))
@@ -74,7 +74,7 @@ namespace Xiropht_Connector_All.Utils
 
         public static string FromHex(string hex)
         {
-            var ba = Encoding.UTF8.GetBytes(hex);
+            var ba = ClassUtils.GetByteArrayFromString(hex);
 
             return BitConverter.ToString(ba).Replace("-", "");
         }
@@ -202,6 +202,8 @@ namespace Xiropht_Connector_All.Utils
             return lstfinal;
         }
 
+   
+
         public static byte[] StrToByteArray(string str)
         {
             var hexindex = new Dictionary<string, byte>();
@@ -225,15 +227,46 @@ namespace Xiropht_Connector_All.Utils
                     {
                         dstream.CopyTo(output);
                     }
-                    return Encoding.UTF8.GetString(output.ToArray());
+                    var outputData = output.ToArray();
+                    return ClassUtils.GetStringFromByteArray(outputData, outputData.Length);
                 }
             }
         }
 
 
+        public static string GetStringFromByteArray(byte[] array, int received)
+        {
+            string result = string.Empty;
+
+            for(int i = 0; i < received; i++)
+            {
+                if (i < received)
+                {
+                    result += (char)array[i];
+                }
+            }
+            return result;
+        }
+
+        public static byte[] GetByteArrayFromString(string content)
+        {
+            byte[] result;
+            List<byte> listByte = new List<byte>();
+            for(int i = 0; i < content.Length; i++)
+            {
+                if (i < content.Length)
+                {
+                    listByte.Add((byte)content[i]);
+                }
+            }
+            result = listByte.ToArray();
+            listByte.Clear();
+            return result;
+        }
+
         public static string ConvertStringtoSHA512(string str)
         {
-            var bytes = Encoding.UTF8.GetBytes(str);
+            var bytes = ClassUtils.GetByteArrayFromString(str);
             using (var hash = SHA512.Create())
             {
                 var hashedInputBytes = hash.ComputeHash(bytes);
