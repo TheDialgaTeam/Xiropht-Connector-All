@@ -234,7 +234,7 @@ namespace Xiropht_Connector_All.Utils
                     {
                         using (CryptoStream cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
                         {
-                            byte[] plainTextBytes = ClassUtils.GetByteArrayFromString(plainText);
+                            byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
                             cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
                             cryptoStream.FlushFinalBlock();
                             byte[] cipherTextBytes = memoryStream.ToArray();
@@ -269,7 +269,7 @@ namespace Xiropht_Connector_All.Utils
                         {
                             byte[] plainTextBytes = new byte[cipherTextBytes.Length];
                             int decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
-                            return ClassUtils.GetStringFromByteArray(plainTextBytes, decryptedByteCount);
+                            return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
                         }
                     }
                 }
@@ -286,7 +286,7 @@ namespace Xiropht_Connector_All.Utils
         /// <returns></returns>
         public string EncryptStringManual(string plainText, string passPhrase, int keysize)
         {
-            using (PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex(passPhrase.Substring(0, 8)))))
+            using (PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, Encoding.UTF8.GetBytes(ClassUtils.FromHex(passPhrase.Substring(0, 8)))))
             {
                 byte[] keyBytes = password.GetBytes(keysize / 8);
                 using (var symmetricKey = new AesCryptoServiceProvider() { Mode = CipherMode.CFB })
@@ -302,7 +302,7 @@ namespace Xiropht_Connector_All.Utils
                         {
                             using (CryptoStream cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
                             {
-                                byte[] plainTextBytes = ClassUtils.GetByteArrayFromString(plainText);
+                                byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
                                 cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
                                 cryptoStream.FlushFinalBlock();
                                 byte[] cipherTextBytes = memoryStream.ToArray();
@@ -323,7 +323,7 @@ namespace Xiropht_Connector_All.Utils
         /// <returns></returns>
         public string DecryptStringManual(string cipherText, string passPhrase, int keysize)
         {
-            using (PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex(passPhrase.Substring(0, 8)))))
+            using (PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, Encoding.UTF8.GetBytes(ClassUtils.FromHex(passPhrase.Substring(0, 8)))))
             {
 
                 byte[] keyBytes = password.GetBytes(keysize / 8);
@@ -343,7 +343,7 @@ namespace Xiropht_Connector_All.Utils
                             {
                                 byte[] plainTextBytes = new byte[cipherTextBytes.Length];
                                 int decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
-                                return ClassUtils.GetStringFromByteArray(plainTextBytes, decryptedByteCount);
+                                return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
                             }
                         }
                     }

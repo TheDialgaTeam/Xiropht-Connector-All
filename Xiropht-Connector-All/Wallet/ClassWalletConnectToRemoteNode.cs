@@ -22,7 +22,7 @@ namespace Xiropht_Connector_All.Wallet
 
         public ClassWalletConnectToRemoteNodeObjectSendPacket(string packet)
         {
-            packetByte = ClassUtils.GetByteArrayFromString(packet);
+            packetByte = Encoding.UTF8.GetBytes(packet);
         }
 
         ~ClassWalletConnectToRemoteNodeObjectSendPacket()
@@ -270,7 +270,7 @@ namespace Xiropht_Connector_All.Wallet
                             int received = await bufferedStreamNetwork.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
                             if (received > 0)
                             {
-                                string packet = ClassUtils.GetStringFromByteArray(bufferPacket.buffer, received);
+                                string packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
                                 if (packet.Contains("*"))
                                 {
                                     if (!string.IsNullOrEmpty(MalformedPacket))

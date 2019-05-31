@@ -136,7 +136,7 @@ namespace Xiropht_Connector_All.Wallet
                 default:
                     if (AesIvCertificate == null)
                     {
-                        using (PasswordDeriveBytes password = new PasswordDeriveBytes(WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex((WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY).Substring(0, 8)))))
+                        using (PasswordDeriveBytes password = new PasswordDeriveBytes(WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY, Encoding.UTF8.GetBytes(ClassUtils.FromHex((WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY).Substring(0, 8)))))
                         {
                             AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
                             AesSaltCertificate = password.GetBytes(16);
@@ -165,7 +165,7 @@ namespace Xiropht_Connector_All.Wallet
                 default:
                     if (AesIvCertificate == null)
                     {
-                        using (PasswordDeriveBytes password = new PasswordDeriveBytes(WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex((WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY).Substring(0, 8)))))
+                        using (PasswordDeriveBytes password = new PasswordDeriveBytes(WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY, Encoding.UTF8.GetBytes(ClassUtils.FromHex((WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY).Substring(0, 8)))))
                         {
                             AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
                             AesSaltCertificate = password.GetBytes(16);
@@ -177,7 +177,7 @@ namespace Xiropht_Connector_All.Wallet
 
         public void UpdateWalletIv()
         {
-            using (PasswordDeriveBytes password = new PasswordDeriveBytes(WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex((WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY).Substring(0, 8)))))
+            using (PasswordDeriveBytes password = new PasswordDeriveBytes(WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY, Encoding.UTF8.GetBytes(ClassUtils.FromHex((WalletAddress + WalletPassword + WalletKey + ClassConnectorSetting.NETWORK_GENESIS_KEY).Substring(0, 8)))))
             {
                 AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
                 AesSaltCertificate = password.GetBytes(16);

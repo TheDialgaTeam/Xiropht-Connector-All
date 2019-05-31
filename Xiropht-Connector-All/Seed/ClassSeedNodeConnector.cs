@@ -21,7 +21,7 @@ namespace Xiropht_Connector_All.Seed
 
         public ClassSeedNodeConnectorObjectSendPacket(string packet)
         {
-            packetByte = ClassUtils.GetByteArrayFromString(packet);
+            packetByte = Encoding.UTF8.GetBytes(packet);
         }
 
         ~ClassSeedNodeConnectorObjectSendPacket()
@@ -311,7 +311,7 @@ namespace Xiropht_Connector_All.Seed
                             {
                                 if (AesIvCertificate == null)
                                 {
-                                    using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex(certificate.Substring(0, 8)))))
+                                    using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate, Encoding.UTF8.GetBytes(ClassUtils.FromHex(certificate.Substring(0, 8)))))
                                     {
                                         AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8); 
                                         AesSaltCertificate = password.GetBytes(16);
@@ -387,15 +387,16 @@ namespace Xiropht_Connector_All.Seed
 
                                 if (received > 0)
                                 {
-                                    //bufferPacket.packet = ClassUtils.GetByteArrayFromString(bufferPacket.buffer, 0, received);
-                                    bufferPacket.packet = ClassUtils.GetStringFromByteArray(bufferPacket.buffer, received);
+                                    bufferPacket.packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
+
+
                                     if (bufferPacket.packet != ClassSeedNodeStatus.SeedError && bufferPacket.packet != ClassSeedNodeStatus.SeedNone)
                                     {
                                         if (isEncrypted)
                                         {
                                             if (AesIvCertificate == null)
                                             {
-                                                using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex(certificate.Substring(0, 8)))))
+                                                using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate, Encoding.UTF8.GetBytes(ClassUtils.FromHex(certificate.Substring(0, 8)))))
                                                 {
                                                     AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
                                                     AesSaltCertificate = password.GetBytes(16);
