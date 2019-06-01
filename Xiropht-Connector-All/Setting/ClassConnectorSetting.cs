@@ -74,8 +74,9 @@ namespace Xiropht_Connector_All.Setting
         public const int MaxDecimalPlace = 8;
         public const int MinWalletAddressSize = 48;
         public const int MaxWalletAddressSize = 96;
-        public const int SeedNodeMaxDisconnection = 5; // Max disconnection before received.
-        public const int SeedNodeMaxKeepAliveDisconnection = 60; // Keep alive total disconnection pending 60 seconds.
+        public const int SeedNodeMaxDisconnection = 10; // Max disconnection before received.
+        public const int SeedNodeMaxRetry = 5; // Max attempt to connect.
+        public const int SeedNodeMaxKeepAliveDisconnection = 15; // Keep alive total disconnection pending 60 seconds.
         public const string CoinName = "Xiropht";
         public const string CoinNameMin = "XIRO";
     }

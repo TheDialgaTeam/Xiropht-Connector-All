@@ -35,6 +35,8 @@ namespace Xiropht_Connector_All.Wallet
         /// <param name="seedNodeConnector"></param>
         public ClassWalletConnect(ClassSeedNodeConnector seedNodeConnector)
         {
+            AesIvCertificate = null;
+            AesSaltCertificate = null;
             _seedNodeConnector = seedNodeConnector;
         }
 

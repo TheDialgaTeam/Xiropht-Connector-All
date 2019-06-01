@@ -155,103 +155,126 @@ namespace Xiropht_Connector_All.Seed
                 _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
                 return true;
             }
-
-            Dictionary<string, int> ListOfSeedNodesSpeed = new Dictionary<string, int>();
-            foreach (var seedNode in ClassConnectorSetting.SeedNodeIp)
+            else
             {
-
-                try
+                Dictionary<string, int> ListOfSeedNodesSpeed = new Dictionary<string, int>();
+                foreach (var seedNode in ClassConnectorSetting.SeedNodeIp)
                 {
-                    int seedNodeResponseTime = -1;
-                    Task taskCheckSeedNode = Task.Run(() => seedNodeResponseTime = CheckPing.CheckPingHost(seedNode.Key, true));
-                    taskCheckSeedNode.Wait(ClassConnectorSetting.MaxPingDelay);
-                    if (seedNodeResponseTime == -1)
+
+                    try
                     {
-                        seedNodeResponseTime = ClassConnectorSetting.MaxTimeoutConnect;
-                    }
+                        int seedNodeResponseTime = -1;
+                        Task taskCheckSeedNode = Task.Run(() => seedNodeResponseTime = CheckPing.CheckPingHost(seedNode.Key, true));
+                        taskCheckSeedNode.Wait(ClassConnectorSetting.MaxPingDelay);
+                        if (seedNodeResponseTime == -1)
+                        {
+                            seedNodeResponseTime = ClassConnectorSetting.MaxTimeoutConnect;
+                        }
 #if DEBUG
                     Console.WriteLine(seedNode.Key + " response time: " + seedNodeResponseTime + " ms.");
 #endif
-                    ListOfSeedNodesSpeed.Add(seedNode.Key, seedNodeResponseTime);
+                        ListOfSeedNodesSpeed.Add(seedNode.Key, seedNodeResponseTime);
 
-                }
-                catch
-                {
-                    ListOfSeedNodesSpeed.Add(seedNode.Key, ClassConnectorSetting.MaxTimeoutConnect); // Max delay.
-                }
-
-            }
-
-            ListOfSeedNodesSpeed = ListOfSeedNodesSpeed.OrderBy(u => u.Value).ToDictionary(z => z.Key, y => y.Value);
-
-            var success = false;
-            var seedNodeTested = false;
-            foreach (var seedNode in ListOfSeedNodesSpeed)
-            {
-#if DEBUG
-                Console.WriteLine("Seed Node Host target: " + seedNode.Key);
-#endif
-                try
-                {
-                    if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(seedNode.Key))
+                    }
+                    catch
                     {
-                        int totalDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item1;
-                        long lastDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item2;
-                        if (lastDisconnection + ClassConnectorSetting.SeedNodeMaxKeepAliveDisconnection < ClassUtils.DateUnixTimeNowSecond())
-                        {
-                            totalDisconnection = 0;
-                            ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection, lastDisconnection);
-                        }
-                        if (totalDisconnection < ClassConnectorSetting.SeedNodeMaxDisconnection)
-                        {
-                            _connector = new TcpClient();
-                            seedNodeTested = true;
-                            if (_connector.ConnectAsync(seedNode.Key, port).Wait(ClassConnectorSetting.MaxTimeoutConnect))
-                            {
-                                success = true;
-                                _isConnected = true;
-                                _currentSeedNodeHost = seedNode.Key;
-                                break;
-                            }
-                            else
-                            { 
-                                ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection+1, ClassUtils.DateUnixTimeNowSecond());
-                            }
-                        }
+                        ListOfSeedNodesSpeed.Add(seedNode.Key, ClassConnectorSetting.MaxTimeoutConnect); // Max delay.
                     }
 
                 }
-                catch (Exception error)
+
+                ListOfSeedNodesSpeed = ListOfSeedNodesSpeed.OrderBy(u => u.Value).ToDictionary(z => z.Key, y => y.Value);
+
+                var success = false;
+                var seedNodeTested = false;
+                foreach (var seedNode in ListOfSeedNodesSpeed)
                 {
+#if DEBUG
+                    Console.WriteLine("Seed Node Host target: " + seedNode.Key);
+#endif
+                    try
+                    {
+                        if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(seedNode.Key))
+                        {
+                            int totalDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item1;
+                            long lastDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item2;
+                            if (lastDisconnection + ClassConnectorSetting.SeedNodeMaxKeepAliveDisconnection < ClassUtils.DateUnixTimeNowSecond())
+                            {
+                                totalDisconnection = 0;
+                                ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection, lastDisconnection);
+                            }
+                            if (totalDisconnection < ClassConnectorSetting.SeedNodeMaxDisconnection)
+                            {
+                                seedNodeTested = true;
+                                int maxRetry = 0;
+                                while (maxRetry < ClassConnectorSetting.SeedNodeMaxRetry || success)
+                                {
+                                    _connector = new TcpClient();
+                                    var connectTask = _connector.ConnectAsync(seedNode.Key, port);
+                                    var connectTaskDelay = Task.Delay(ClassConnectorSetting.MaxTimeoutConnect);
+
+                                    var completedConnectTask = await Task.WhenAny(connectTask, connectTaskDelay);
+                                    if (completedConnectTask == connectTask)
+                                    {
+#if DEBUG
+                                        Console.WriteLine("Successfully connected to Seed Node: " + seedNode.Key);
+#endif
+                                        success = true;
+                                        _isConnected = true;
+                                        _currentSeedNodeHost = seedNode.Key;
+                                        maxRetry = ClassConnectorSetting.SeedNodeMaxRetry;
+                                        _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
+                                        new Thread(delegate () { EnableCheckConnection(); }).Start();
+
+                                        return true;
+                                    }
+                                    else
+                                    {
+#if DEBUG
+                                        Console.WriteLine("Failed to connect to Seed Node: " + seedNode.Key);
+#endif
+                                        if (maxRetry >= ClassConnectorSetting.SeedNodeMaxRetry)
+                                        {
+                                            ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection + 1, ClassUtils.DateUnixTimeNowSecond());
+                                        }
+                                    }
+                                    try
+                                    {
+                                        _connector?.Close();
+                                        _connector?.Dispose();
+                                    }
+                                    catch
+                                    {
+
+                                    }
+                                    maxRetry++;
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Max disconnection is reach for seed node: " + seedNode.Key);
+                            }
+                        }
+
+                    }
+                    catch (Exception error)
+                    {
 #if DEBUG
                         Console.WriteLine("Error to connect on seed node: " + error.Message);
 #endif
-                }
+                    }
 
-            }
-            if (!seedNodeTested) // Clean up just in case if every seed node return too much disconnection saved in their counter.
-            {
-                foreach(var seednode in ClassConnectorSetting.SeedNodeIp)
+                }
+                if (!seedNodeTested) // Clean up just in case if every seed node return too much disconnection saved in their counter.
                 {
-                    if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(seednode.Key))
+                    foreach (var seednode in ClassConnectorSetting.SeedNodeIp)
                     {
-                        ClassConnectorSetting.SeedNodeDisconnectScore[seednode.Key] = new Tuple<int, long>(0, 0);
+                        if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(seednode.Key))
+                        {
+                            ClassConnectorSetting.SeedNodeDisconnectScore[seednode.Key] = new Tuple<int, long>(0, 0);
+                        }
                     }
                 }
-            }
-            if (success)
-            {
-                _isConnected = true;
-
-                _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
-
-                new Thread(delegate () { EnableCheckConnection(); }).Start();
-
-                return true;
-            }
-            else
-            {
-                _isConnected = false;
             }
             return false;
         }
@@ -418,7 +441,6 @@ namespace Xiropht_Connector_All.Seed
                                                         {
                                                             if (packetEach.Length > 1)
                                                             {
-
                                                                 if (packetEach.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
                                                                 {
                                                                     bufferPacket.packet += packetEach.Replace("*", "") + "*";
