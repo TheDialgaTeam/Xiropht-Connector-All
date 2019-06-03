@@ -168,7 +168,7 @@ namespace Xiropht_Connector_All.Seed
                         taskCheckSeedNode.Wait(ClassConnectorSetting.MaxPingDelay);
                         if (seedNodeResponseTime == -1)
                         {
-                            seedNodeResponseTime = ClassConnectorSetting.MaxTimeoutConnect;
+                            seedNodeResponseTime = ClassConnectorSetting.MaxSeedNodeTimeoutConnect;
                         }
 #if DEBUG
                     Console.WriteLine(seedNode.Key + " response time: " + seedNodeResponseTime + " ms.");
@@ -178,7 +178,7 @@ namespace Xiropht_Connector_All.Seed
                     }
                     catch
                     {
-                        ListOfSeedNodesSpeed.Add(seedNode.Key, ClassConnectorSetting.MaxTimeoutConnect); // Max delay.
+                        ListOfSeedNodesSpeed.Add(seedNode.Key, ClassConnectorSetting.MaxSeedNodeTimeoutConnect); // Max delay.
                     }
 
                 }
@@ -211,7 +211,7 @@ namespace Xiropht_Connector_All.Seed
                                 {
                                     _connector = new TcpClient();
                                     var connectTask = _connector.ConnectAsync(seedNode.Key, port);
-                                    var connectTaskDelay = Task.Delay(ClassConnectorSetting.MaxTimeoutConnect);
+                                    var connectTaskDelay = Task.Delay(ClassConnectorSetting.MaxSeedNodeTimeoutConnect);
 
                                     var completedConnectTask = await Task.WhenAny(connectTask, connectTaskDelay);
                                     if (completedConnectTask == connectTask)
@@ -252,7 +252,11 @@ namespace Xiropht_Connector_All.Seed
                             }
                             else
                             {
+#if DEBUG
+                            
                                 Console.WriteLine("Max disconnection is reach for seed node: " + seedNode.Key);
+                            
+#endif
                             }
                         }
 
@@ -471,7 +475,6 @@ namespace Xiropht_Connector_All.Seed
                                                                     }
                                                                 }
                                                             }
-                                                            
                                                         }
                                                     }
                                                 }

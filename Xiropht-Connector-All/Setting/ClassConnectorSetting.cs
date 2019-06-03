@@ -61,6 +61,7 @@ namespace Xiropht_Connector_All.Setting
         public const decimal MinimumWalletTransactionAnonymousFee = 0.000010000m;
         public const decimal ConstantBlockReward = 10.00000000m;
         public const int MaxTimeoutConnect = 5000;
+        public const int MaxSeedNodeTimeoutConnect = 1000;
         public const int MaxPingDelay = 1000;
         public const int MaxTimeoutConnectRemoteNode = 500;
         public const int MaxTimeoutSendPacket = 2000;
@@ -76,7 +77,7 @@ namespace Xiropht_Connector_All.Setting
         public const int MaxWalletAddressSize = 96;
         public const int SeedNodeMaxDisconnection = 10; // Max disconnection before received.
         public const int SeedNodeMaxRetry = 5; // Max attempt to connect.
-        public const int SeedNodeMaxKeepAliveDisconnection = 15; // Keep alive total disconnection pending 60 seconds.
+        public const int SeedNodeMaxKeepAliveDisconnection = 15; // Keep alive total disconnection pending 15 seconds.
         public const string CoinName = "Xiropht";
         public const string CoinNameMin = "XIRO";
     }
