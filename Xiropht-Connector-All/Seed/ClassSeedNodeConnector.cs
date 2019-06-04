@@ -414,8 +414,7 @@ namespace Xiropht_Connector_All.Seed
 
                                 if (received > 0)
                                 {
-                                    //bufferPacket.packet = ClassUtils.GetByteArrayFromString(bufferPacket.buffer, 0, received);
-                                    bufferPacket.packet = ClassUtils.GetStringFromByteArray(bufferPacket.buffer, received);
+                                    bufferPacket.packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
                                     if (bufferPacket.packet != ClassSeedNodeStatus.SeedError && bufferPacket.packet != ClassSeedNodeStatus.SeedNone)
                                     {
                                         if (isEncrypted)
