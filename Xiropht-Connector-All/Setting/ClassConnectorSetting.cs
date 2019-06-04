@@ -62,7 +62,7 @@ namespace Xiropht_Connector_All.Setting
         public const decimal ConstantBlockReward = 10.00000000m;
         public const int MaxTimeoutConnect = 5000;
         public const int MaxSeedNodeTimeoutConnect = 1000;
-        public const int MaxPingDelay = 1000;
+        public const int MaxPingDelay = 2000;
         public const int MaxTimeoutConnectRemoteNode = 1000;
         public const int MaxTimeoutSendPacket = 2000;
         public const int MaxTimeoutConnectLocalhostRemoteNode = 100;

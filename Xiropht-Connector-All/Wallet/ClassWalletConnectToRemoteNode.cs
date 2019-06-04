@@ -198,7 +198,7 @@ namespace Xiropht_Connector_All.Wallet
 
             _remoteNodeClient.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
 
-            new Thread(delegate () { EnableCheckConnection(); }).Start();
+            await Task.Factory.StartNew(() => EnableCheckConnection(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current).ConfigureAwait(false);
             
             return true;
         }
@@ -233,7 +233,7 @@ namespace Xiropht_Connector_All.Wallet
                     RemoteNodeStatus = false;
                     break;
                 }
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
             }
         }
 

@@ -286,10 +286,10 @@ namespace Xiropht_Connector_All.Utils
             if (socket?.Client != null)
                 try
                 {
-                    if (isClientConnected(socket))
+                    /*if (isClientConnected(socket))
                     {
                         return true;
-                    }
+                    }*/
                     return !(socket.Client.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
                 }
                 catch

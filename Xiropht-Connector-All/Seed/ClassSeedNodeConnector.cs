@@ -224,7 +224,7 @@ namespace Xiropht_Connector_All.Seed
                                         _currentSeedNodeHost = seedNode.Key;
                                         maxRetry = ClassConnectorSetting.SeedNodeMaxRetry;
                                         _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
-                                        new Thread(delegate () { EnableCheckConnection(); }).Start();
+                                        await Task.Factory.StartNew(() => EnableCheckConnectionAsync(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current).ConfigureAwait(false);
 
                                         return true;
                                     }
@@ -286,9 +286,9 @@ namespace Xiropht_Connector_All.Seed
         /// <summary>
         /// Check the connection opened to the network.
         /// </summary>
-        private void EnableCheckConnection()
+        private async Task EnableCheckConnectionAsync()
         {
-            while(_isConnected)
+            while (_isConnected)
             {
                 try
                 {
@@ -303,7 +303,7 @@ namespace Xiropht_Connector_All.Seed
                     _isConnected = false;
                     break;
                 }
-               Thread.Sleep(1000);
+                await Task.Delay(1000);
             }
         }
 
