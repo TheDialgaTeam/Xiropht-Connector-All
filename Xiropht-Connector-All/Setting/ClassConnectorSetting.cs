@@ -65,7 +65,7 @@ namespace Xiropht_Connector_All.Setting
         public const int MaxPingDelay = 2000;
         public const int MaxTimeoutConnectRemoteNode = 1000;
         public const int MaxTimeoutSendPacket = 2000;
-        public const int MaxTimeoutConnectLocalhostRemoteNode = 100;
+        public const int MaxTimeoutConnectLocalhostRemoteNode = 1000;
         public const int MaxNetworkPacketSize = 16384;
         public const int MaxRemoteNodeInvalidPacket = 10;
         public const int MaxRemoteNodeBanTime = 60; // 60 seconds.

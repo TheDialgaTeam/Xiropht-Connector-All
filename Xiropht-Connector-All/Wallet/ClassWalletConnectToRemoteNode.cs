@@ -195,9 +195,15 @@ namespace Xiropht_Connector_All.Wallet
             }
 
             RemoteNodeHost = host;
-
-            _remoteNodeClient.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
-
+            try
+            {
+                _remoteNodeClient.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
+            }
+            catch
+            {
+                DisconnectRemoteNodeClient();
+                return false;
+            }
             await Task.Factory.StartNew(() => EnableCheckConnection(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current).ConfigureAwait(false);
             
             return true;
@@ -233,7 +239,7 @@ namespace Xiropht_Connector_All.Wallet
                     RemoteNodeStatus = false;
                     break;
                 }
-                await Task.Delay(5000);
+                await Task.Delay(1000);
             }
         }
 
