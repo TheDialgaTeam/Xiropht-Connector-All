@@ -58,6 +58,8 @@ namespace Xiropht_Connector_All.Wallet
         public void SelectWalletPhase(string walletPhase)
         {
             WalletPhase = walletPhase;
+            AesIvCertificate = null;
+            AesSaltCertificate = null;
         }
 
         /// <summary>
