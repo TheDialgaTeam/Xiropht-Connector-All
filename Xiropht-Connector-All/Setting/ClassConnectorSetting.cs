@@ -45,10 +45,10 @@ namespace Xiropht_Connector_All.Setting
 
         public const decimal NETWORK_MINING_ACCURACY_EXPECTED = 80; // 80% average of accuracy from miners expected. Use for calculate network hashrate from network difficulty.
 
-        public static Dictionary<string, string> SeedNodeIp = new Dictionary<string, string>
+        public static Dictionary<string, Tuple<string, bool>> SeedNodeIp = new Dictionary<string, Tuple<string, bool>>
         {
-            {"87.98.156.228", "FR" },
-            {"66.70.227.204", "CA" }
+            {"87.98.156.228", new Tuple<string, bool>("FR", true) },
+            {"66.70.227.204", new Tuple<string, bool>("CA", true) }
         };
 
         public static Dictionary<string, Tuple<int, long>> SeedNodeDisconnectScore = new Dictionary<string, Tuple<int, long>>
@@ -75,6 +75,8 @@ namespace Xiropht_Connector_All.Setting
         public const int MaxDecimalPlace = 8;
         public const int MinWalletAddressSize = 48;
         public const int MaxWalletAddressSize = 96;
+        public const int MaxTransactionHashSize = 128;
+        public const int MaxBlockHashSize = 64;
         public const int SeedNodeMaxDisconnection = 10; // Max disconnection before received.
         public const int SeedNodeMaxRetry = 2; // Max attempt to connect.
         public const int SeedNodeMaxKeepAliveDisconnection = 15; // Keep alive total disconnection pending 15 seconds.

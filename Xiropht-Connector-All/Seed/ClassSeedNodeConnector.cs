@@ -98,6 +98,7 @@ namespace Xiropht_Connector_All.Seed
         private byte[] AesSaltCertificate;
 
 
+
         ~ClassSeedNodeConnector()
         {
             Dispose(false);
@@ -461,7 +462,7 @@ namespace Xiropht_Connector_All.Seed
                                                                         var newSeedNodeCountry = splitPacketNewSeedNode[1];
                                                                         if(!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
                                                                         {
-                                                                            ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, newSeedNodeCountry);
+                                                                            ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, new Tuple<string, bool>(newSeedNodeCountry, false));
                                                                         }
                                                                         if (!ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(newSeedNodeHost))
                                                                         {
@@ -495,7 +496,7 @@ namespace Xiropht_Connector_All.Seed
                                                             var newSeedNodeCountry = splitPacketNewSeedNode[1];
                                                             if (!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
                                                             {
-                                                                ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, newSeedNodeCountry);
+                                                                ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, new Tuple<string, bool>(newSeedNodeCountry, false));
                                                             }
                                                             if (!ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(newSeedNodeHost))
                                                             {

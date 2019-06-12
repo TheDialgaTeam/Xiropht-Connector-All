@@ -70,6 +70,20 @@ namespace Xiropht_Connector_All.Wallet
         /// <param name="isEncrypted"></param>
         public async Task<bool> SendPacketWallet(string packet, string certificate, bool isEncrypted)
         {
+            if (WalletPhase == ClassConnectorSettingEnumeration.WalletCreateType || WalletPhase == string.Empty) // Not allow to create a wallet on non-permanent seed nodes.
+            {
+                if (ClassConnectorSetting.SeedNodeIp.ContainsKey(_seedNodeConnector.ReturnCurrentSeedNodeHost()))
+                {
+                    if (!ClassConnectorSetting.SeedNodeIp[_seedNodeConnector.ReturnCurrentSeedNodeHost()].Item2)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
             return await _seedNodeConnector.SendPacketToSeedNodeAsync(EncryptPacketWallet(packet), certificate, false, isEncrypted);
         }
 
@@ -82,6 +96,20 @@ namespace Xiropht_Connector_All.Wallet
             string packet = string.Empty;
             try
             {
+                if (WalletPhase == ClassConnectorSettingEnumeration.WalletCreateType || WalletPhase == string.Empty) // Not allow to create a wallet on non-permanent seed nodes.
+                {
+                    if(ClassConnectorSetting.SeedNodeIp.ContainsKey(_seedNodeConnector.ReturnCurrentSeedNodeHost()))
+                    {
+                        if (!ClassConnectorSetting.SeedNodeIp[_seedNodeConnector.ReturnCurrentSeedNodeHost()].Item2)
+                        {
+                            return ClassSeedNodeStatus.SeedError;
+                        }
+                    }
+                    else
+                    {
+                        return ClassSeedNodeStatus.SeedError;
+                    }
+                }
                 packet = await _seedNodeConnector.ReceivePacketFromSeedNodeAsync(certificate, false, isEncrypted);
                 if (packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendRemoteNode) || packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletResultMaxSupply) || packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletResultCoinCirculating) || packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletResultNetworkDifficulty) || packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletResultNetworkHashrate) || packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletResultTotalBlockMined) || packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletResultTotalTransactionFee) || packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletResultTotalPendingTransaction) || packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletResultBlockPerId)) return packet;
 
