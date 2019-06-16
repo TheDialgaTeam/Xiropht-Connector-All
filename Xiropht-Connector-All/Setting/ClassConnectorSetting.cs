@@ -75,8 +75,6 @@ namespace Xiropht_Connector_All.Setting
         public const int MaxDecimalPlace = 8;
         public const int MinWalletAddressSize = 48;
         public const int MaxWalletAddressSize = 96;
-        public const int MaxTransactionHashSize = 128;
-        public const int MaxBlockHashSize = 64;
         public const int SeedNodeMaxDisconnection = 10; // Max disconnection before received.
         public const int SeedNodeMaxRetry = 2; // Max attempt to connect.
         public const int SeedNodeMaxKeepAliveDisconnection = 15; // Keep alive total disconnection pending 15 seconds.
