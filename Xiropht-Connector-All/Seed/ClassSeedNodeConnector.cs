@@ -139,7 +139,14 @@ namespace Xiropht_Connector_All.Seed
                 try
                 {
                     _connector = new TcpClient();
-                    await _connector.ConnectAsync(host, port);
+                    var connectTask = _connector.ConnectAsync(host, port);
+                    var connectTaskDelay = Task.Delay(ClassConnectorSetting.MaxSeedNodeTimeoutConnect);
+
+                    var completedConnectTask = await Task.WhenAny(connectTask, connectTaskDelay);
+                    if (completedConnectTask != connectTask)
+                    {
+                        return false;
+                    }
                 }
 
                 catch (Exception error)
@@ -153,7 +160,14 @@ namespace Xiropht_Connector_All.Seed
 
                 _isConnected = true;
                 _currentSeedNodeHost = host;
-                _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
+                try
+                {
+                    _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
+                }
+                catch
+                {
+                    return false;
+                }
                 return true;
             }
             else
@@ -224,7 +238,14 @@ namespace Xiropht_Connector_All.Seed
                                         _isConnected = true;
                                         _currentSeedNodeHost = seedNode.Key;
                                         maxRetry = ClassConnectorSetting.SeedNodeMaxRetry;
-                                        _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
+                                        try
+                                        {
+                                            _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
+                                        }
+                                        catch
+                                        {
+                                            return false;
+                                        }
                                         await Task.Factory.StartNew(() => EnableCheckConnectionAsync(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current).ConfigureAwait(false);
 
                                         return true;
