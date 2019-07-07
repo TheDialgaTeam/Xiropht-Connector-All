@@ -11,6 +11,7 @@
         public const string TokenAskWalletAnonymousId = "TOKEN-ASK-WALLET-ANONYMOUS-ID";
         public const string TokenAskWalletSendTransaction = "TOKEN-ASK-WALLET-SEND-TRANSACTION";
         public const string TokenCheckWalletAddressExist = "TOKEN-CHECK-WALLET-ADDRESS-EXIST";
+        public const string TokenAskWalletTransfer = "TOKEN-ASK-WALLET-TRANSFER";
 
         /// <summary>
         /// Reponse.
@@ -28,5 +29,10 @@
         public const string SendTokenTransactionRefused = "SEND-TOKEN-TRANSACTION-REFUSED";
         public const string SendTokenTransactionBusy = "SEND-TOKEN-TRANSACTION-BUSY";
         public const string SendTokenTransactionInvalidTarget = "SEND-TOKEN-TRANSACTION-INVALID-TARGET";
+
+        // Response of transfer.
+        public const string SendTokenTransferConfirmed = "SEND-TOKEN-TRANSFER-CONFIRMED";
+        public const string SendTokenTransferRefused = "SEND-TOKEN-TRANSFER-REFUSED";
+        public const string SendTokenTransferBusy = "SEND-TOKEN-TRANSFER-BUSY";
     }
 }
