@@ -478,10 +478,12 @@ namespace Xiropht_Connector_All.Seed
                                                                     if (packetDecrypt.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
                                                                     {
                                                                         var packetNewSeedNode = packetDecrypt.Replace(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode, "");
+                                                                        packetNewSeedNode = packetNewSeedNode.Replace("*", "");
                                                                         var splitPacketNewSeedNode = packetNewSeedNode.Split(new[] { ";" }, StringSplitOptions.None);
                                                                         var newSeedNodeHost = splitPacketNewSeedNode[0];
                                                                         var newSeedNodeCountry = splitPacketNewSeedNode[1];
-                                                                        if(!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
+
+                                                                        if (!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
                                                                         {
                                                                             ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, new Tuple<string, bool>(newSeedNodeCountry, false));
                                                                         }

@@ -48,13 +48,15 @@ namespace Xiropht_Connector_All.Setting
         public static Dictionary<string, Tuple<string, bool>> SeedNodeIp = new Dictionary<string, Tuple<string, bool>>
         {
             {"87.98.156.228", new Tuple<string, bool>("FR", true) },
-            {"66.70.227.204", new Tuple<string, bool>("CA", true) }
+            {"66.70.227.204", new Tuple<string, bool>("CA", true) },
+            {"74.121.191.114", new Tuple<string, bool>("USA-SEATTLE", true) },
         };
 
         public static Dictionary<string, Tuple<int, long>> SeedNodeDisconnectScore = new Dictionary<string, Tuple<int, long>>
         {
             {"87.98.156.228", new Tuple<int, long>(0, 0)},
-            {"66.70.227.204", new Tuple<int, long>(0, 0)}
+            {"66.70.227.204", new Tuple<int, long>(0, 0)},
+            {"74.121.191.114", new Tuple<int, long>(0, 0)}
         };
 
         public const decimal MinimumWalletTransactionFee = 0.000010000m;
