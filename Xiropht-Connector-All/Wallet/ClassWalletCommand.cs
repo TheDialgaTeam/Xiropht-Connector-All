@@ -58,9 +58,9 @@
             public const string WalletSendMessage = "WALLET-SEND-MESSAGE"; // Phase 4
             public const string WalletSendTransactionData = "WALLET-SEND-TRANSACTION-DATA"; // Phase 4
             public const string WalletNewGenesisKey = "WALLET-NEW-GENESIS-KEY"; // Phase 4
-
-            public const string WalletSendTotalPendingTransactionOnReceive =
-                "WALLET-SEND-TOTAL-PENDING-TRANSACTION-ON-RECEIVE"; // Phase 4
+            public const string WalletInvalidAsk = "WALLET-ASK-WRONG"; // Phase 0
+            public const string WalletInvalidPacket = "WALLET-INVALID-PACKET"; // Phase 0
+            public const string WalletSendTotalPendingTransactionOnReceive = "WALLET-SEND-TOTAL-PENDING-TRANSACTION-ON-RECEIVE"; // Phase 4
 
         }
     }

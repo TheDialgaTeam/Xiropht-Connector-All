@@ -129,15 +129,28 @@ namespace Xiropht_Connector_All.Wallet
                                     {
                                         if (packetEach.Length > 1)
                                         {
-                                            packetCompleted += DecryptPacketWallet(packetEach.Replace("*", "")) + "*";
+                                            if (packetEach.Replace("*", "") != ClassWalletCommand.ClassWalletReceiveEnumeration.WalletInvalidPacket)
+                                            {
+                                                packetCompleted += DecryptPacketWallet(packetEach.Replace("*", "")) + "*";
+                                            }
+                                            else
+                                            {
+                                                packetCompleted += packetEach.Replace("*", "") + "*";
+                                            }
                                         }
                                     }
                                 }
                             }
                             return packetCompleted;
                         }
-
-                        return DecryptPacketWallet(packet);
+                        if (packet.Replace("*", "") != ClassWalletCommand.ClassWalletReceiveEnumeration.WalletInvalidPacket)
+                        {
+                            return DecryptPacketWallet(packet);
+                        }
+                        else
+                        {
+                            return ClassWalletCommand.ClassWalletReceiveEnumeration.WalletInvalidPacket;
+                        }
                     }
                 }
             }
