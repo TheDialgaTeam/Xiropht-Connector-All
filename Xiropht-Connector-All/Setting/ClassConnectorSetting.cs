@@ -43,8 +43,6 @@ namespace Xiropht_Connector_All.Setting
 
         public const string NETWORK_GENESIS_SECONDARY_KEY = "XIROPHTSEED"; // GENESIS SECONDARY KEY [Layer encryption key included on dynamic certificate key between tools and seed nodes]
 
-        public const decimal NETWORK_MINING_ACCURACY_EXPECTED = 80; // 80% average of accuracy from miners expected. Use for calculate network hashrate from network difficulty.
-
         public static Dictionary<string, Tuple<string, bool>> SeedNodeIp = new Dictionary<string, Tuple<string, bool>>
         {
             {"87.98.156.228", new Tuple<string, bool>("FR", true) },
@@ -80,6 +78,7 @@ namespace Xiropht_Connector_All.Setting
         public const int SeedNodeMaxDisconnection = 10; // Max disconnection before received.
         public const int SeedNodeMaxRetry = 2; // Max attempt to connect.
         public const int SeedNodeMaxKeepAliveDisconnection = 15; // Keep alive total disconnection pending 15 seconds.
+        public const int WalletMinPasswordLength = 8; // Minimum password length
         public const string CoinName = "Xiropht";
         public const string CoinNameMin = "XIRO";
     }
