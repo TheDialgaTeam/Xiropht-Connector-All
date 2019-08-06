@@ -432,132 +432,135 @@ namespace Xiropht_Connector_All.Seed
                         {
                             using (var bufferedNetworkStream = new BufferedStream(_connectorStream, ClassConnectorSetting.MaxNetworkPacketSize))
                             {
-                                int received = await bufferedNetworkStream.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
+                                int received = 0;
 
-                                if (received > 0)
+                                while ((received = await bufferedNetworkStream.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length)) > 0)
                                 {
-                                    bufferPacket.packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
-                                    if (bufferPacket.packet != ClassSeedNodeStatus.SeedError && bufferPacket.packet != ClassSeedNodeStatus.SeedNone)
+                                    if (received > 0)
                                     {
-                                        if (isEncrypted)
+                                        bufferPacket.packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
+                                        if (bufferPacket.packet != ClassSeedNodeStatus.SeedError && bufferPacket.packet != ClassSeedNodeStatus.SeedNone)
                                         {
-                                            if (AesIvCertificate == null)
+                                            if (isEncrypted)
                                             {
-                                                using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex(certificate.Substring(0, 8)))))
+                                                if (AesIvCertificate == null)
                                                 {
-                                                    AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
-                                                    AesSaltCertificate = password.GetBytes(16);
-                                                }
-                                            }
-                                            if (bufferPacket.packet.Contains("*"))
-                                            {
-                                                if (!string.IsNullOrEmpty(MalformedPacket))
-                                                {
-                                                    bufferPacket.packet = MalformedPacket + bufferPacket.packet;
-                                                    MalformedPacket = string.Empty;
-                                                }
-                                                var splitPacket = bufferPacket.packet.Split(new[] { "*" }, StringSplitOptions.None);
-                                                bufferPacket.packet = string.Empty;
-                                                foreach (var packetEach in splitPacket)
-                                                {
-                                                    if (packetEach != null)
+                                                    using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex(certificate.Substring(0, 8)))))
                                                     {
-                                                        if (!string.IsNullOrEmpty(packetEach))
+                                                        AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
+                                                        AesSaltCertificate = password.GetBytes(16);
+                                                    }
+                                                }
+                                                if (bufferPacket.packet.Contains("*"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(MalformedPacket))
+                                                    {
+                                                        bufferPacket.packet = MalformedPacket + bufferPacket.packet;
+                                                        MalformedPacket = string.Empty;
+                                                    }
+                                                    var splitPacket = bufferPacket.packet.Split(new[] { "*" }, StringSplitOptions.None);
+                                                    bufferPacket.packet = string.Empty;
+                                                    foreach (var packetEach in splitPacket)
+                                                    {
+                                                        if (packetEach != null)
                                                         {
-                                                            if (packetEach.Length > 1)
+                                                            if (!string.IsNullOrEmpty(packetEach))
                                                             {
-                                                                if (packetEach.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
+                                                                if (packetEach.Length > 1)
                                                                 {
-                                                                    bufferPacket.packet += packetEach.Replace("*", "") + "*";
-                                                                }
-                                                                else
-                                                                {
-
-                                                                    string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace("*", ""), ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate);
-
-                                                                    if (packetDecrypt.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
+                                                                    if (packetEach.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
                                                                     {
-                                                                        var packetNewSeedNode = packetDecrypt.Replace(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode, "");
-                                                                        packetNewSeedNode = packetNewSeedNode.Replace("*", "");
-                                                                        var splitPacketNewSeedNode = packetNewSeedNode.Split(new[] { ";" }, StringSplitOptions.None);
-                                                                        var newSeedNodeHost = splitPacketNewSeedNode[0];
-                                                                        var newSeedNodeCountry = splitPacketNewSeedNode[1];
-
-                                                                        if (!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
-                                                                        {
-                                                                            ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, new Tuple<string, bool>(newSeedNodeCountry, false));
-                                                                        }
-                                                                        if (!ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(newSeedNodeHost))
-                                                                        {
-                                                                            ClassConnectorSetting.SeedNodeDisconnectScore.Add(newSeedNodeHost, new Tuple<int, long>(0, 0));
-                                                                        }
+                                                                        bufferPacket.packet += packetEach.Replace("*", "") + "*";
                                                                     }
                                                                     else
                                                                     {
-                                                                        bufferPacket.packet += packetDecrypt + "*";
+
+                                                                        string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace("*", ""), ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate);
+
+                                                                        if (packetDecrypt.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
+                                                                        {
+                                                                            var packetNewSeedNode = packetDecrypt.Replace(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode, "");
+                                                                            packetNewSeedNode = packetNewSeedNode.Replace("*", "");
+                                                                            var splitPacketNewSeedNode = packetNewSeedNode.Split(new[] { ";" }, StringSplitOptions.None);
+                                                                            var newSeedNodeHost = splitPacketNewSeedNode[0];
+                                                                            var newSeedNodeCountry = splitPacketNewSeedNode[1];
+
+                                                                            if (!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
+                                                                            {
+                                                                                ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, new Tuple<string, bool>(newSeedNodeCountry, false));
+                                                                            }
+                                                                            if (!ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(newSeedNodeHost))
+                                                                            {
+                                                                                ClassConnectorSetting.SeedNodeDisconnectScore.Add(newSeedNodeHost, new Tuple<int, long>(0, 0));
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            bufferPacket.packet += packetDecrypt + "*";
+                                                                        }
                                                                     }
                                                                 }
                                                             }
                                                         }
                                                     }
                                                 }
-                                            }
-                                            else
-                                            {
-                                                if (!bufferPacket.packet.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
+                                                else
                                                 {
-                                                    try
+                                                    if (!bufferPacket.packet.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
                                                     {
-                                                        string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate);
+                                                        try
+                                                        {
+                                                            string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate);
 
 
-                                                        if (bufferPacket.packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
-                                                        {
-                                                            var packetNewSeedNode = packetDecrypt.Replace(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode, "");
-                                                            var splitPacketNewSeedNode = packetNewSeedNode.Split(new[] { ";" }, StringSplitOptions.None);
-                                                            var newSeedNodeHost = splitPacketNewSeedNode[0];
-                                                            var newSeedNodeCountry = splitPacketNewSeedNode[1];
-                                                            if (!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
+                                                            if (bufferPacket.packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
                                                             {
-                                                                ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, new Tuple<string, bool>(newSeedNodeCountry, false));
-                                                            }
-                                                            if (!ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(newSeedNodeHost))
-                                                            {
-                                                                ClassConnectorSetting.SeedNodeDisconnectScore.Add(newSeedNodeHost, new Tuple<int, long>(0, 0));
-                                                            }
-                                                        }
-                                                        else
-                                                        {
-                                                            if (packetDecrypt != ClassAlgoErrorEnumeration.AlgoError)
-                                                            {
-                                                                bufferPacket.packet = packetDecrypt + "*";
+                                                                var packetNewSeedNode = packetDecrypt.Replace(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode, "");
+                                                                var splitPacketNewSeedNode = packetNewSeedNode.Split(new[] { ";" }, StringSplitOptions.None);
+                                                                var newSeedNodeHost = splitPacketNewSeedNode[0];
+                                                                var newSeedNodeCountry = splitPacketNewSeedNode[1];
+                                                                if (!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
+                                                                {
+                                                                    ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, new Tuple<string, bool>(newSeedNodeCountry, false));
+                                                                }
+                                                                if (!ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(newSeedNodeHost))
+                                                                {
+                                                                    ClassConnectorSetting.SeedNodeDisconnectScore.Add(newSeedNodeHost, new Tuple<int, long>(0, 0));
+                                                                }
                                                             }
                                                             else
                                                             {
-                                                                if (MalformedPacket.Length - 1 >= int.MaxValue || (long)(MalformedPacket.Length + bufferPacket.packet.Length) >= int.MaxValue)
+                                                                if (packetDecrypt != ClassAlgoErrorEnumeration.AlgoError)
                                                                 {
-                                                                    MalformedPacket = string.Empty;
+                                                                    bufferPacket.packet = packetDecrypt + "*";
                                                                 }
-                                                                MalformedPacket += bufferPacket.packet;
+                                                                else
+                                                                {
+                                                                    if (MalformedPacket.Length - 1 >= int.MaxValue || (long)(MalformedPacket.Length + bufferPacket.packet.Length) >= int.MaxValue)
+                                                                    {
+                                                                        MalformedPacket = string.Empty;
+                                                                    }
+                                                                    MalformedPacket += bufferPacket.packet;
+                                                                }
                                                             }
-                                                        }
-                                                       
-                                                    }
-                                                    catch
-                                                    {
 
+                                                        }
+                                                        catch
+                                                        {
+
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
-                                    }
-                                    if (bufferPacket.packet == ClassSeedNodeCommand.ClassReceiveSeedEnumeration.DisconnectPacket)
-                                    {
-                                        _isConnected = false;
-                                        return ClassSeedNodeStatus.SeedError;
-                                    }
+                                        if (bufferPacket.packet == ClassSeedNodeCommand.ClassReceiveSeedEnumeration.DisconnectPacket)
+                                        {
+                                            _isConnected = false;
+                                            return ClassSeedNodeStatus.SeedError;
+                                        }
 
-                                    return bufferPacket.packet;
+                                        return bufferPacket.packet;
+                                    }
                                 }
                             }
                         }
