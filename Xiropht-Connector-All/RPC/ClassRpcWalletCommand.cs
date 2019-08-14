@@ -12,6 +12,7 @@
         public const string TokenAskWalletSendTransaction = "TOKEN-ASK-WALLET-SEND-TRANSACTION";
         public const string TokenCheckWalletAddressExist = "TOKEN-CHECK-WALLET-ADDRESS-EXIST";
         public const string TokenAskWalletTransfer = "TOKEN-ASK-WALLET-TRANSFER";
+        public const string TokenAskRemoteNode = "TOKEN-ASK-REMOTE-NODE";
 
         /// <summary>
         /// Reponse.
@@ -23,6 +24,8 @@
         public const string SendTokenExpired = "SEND-TOKEN-EXPIRED";
         public const string SendTokenCheckWalletAddressValid = "SEND-TOKEN-CHECK-WALLET-ADDRESS-VALID";
         public const string SendTokenCheckWalletAddressInvalid = "SEND-TOKEN-CHECK-WALLET-ADDRESS-INVALID";
+        public const string SendTokenValidInformation = "SEND-TOKEN-VALID-INFORMATION";
+        public const string SendTokenInvalidInformation = "SEND-TOKEN-INVALID-INFORMATION";
 
         // Response of transaction.
         public const string SendTokenTransactionConfirmed = "SEND-TOKEN-TRANSACTION-CONFIRMED";
@@ -34,5 +37,19 @@
         public const string SendTokenTransferConfirmed = "SEND-TOKEN-TRANSFER-CONFIRMED";
         public const string SendTokenTransferRefused = "SEND-TOKEN-TRANSFER-REFUSED";
         public const string SendTokenTransferBusy = "SEND-TOKEN-TRANSFER-BUSY";
+
+        /// <summary>
+        /// Request of checking.
+        /// </summary>
+        public const string TokenCheckMaxSupply = "TOKEN-CHECK-MAX-SUPPLY";
+        public const string TokenCheckCurrentCirculating = "TOKEN-CHECK-CURRENT-CIRCULATING";
+        public const string TokenCheckTotalTransactionFee = "TOKEN-CHECK-TOTAL-TRANSACTION-FEE";
+        public const string TokenCheckTotalBlockMined = "TOKEN-CHECK-TOTAL-BLOCK-MINED";
+        public const string TokenCheckNetworkHashrate = "TOKEN-CHECK-NETWORK-HASHRATE";
+        public const string TokenCheckNetworkDifficulty = "TOKEN-CHECK-NETWORK-DIFFICULTY";
+        public const string TokenCheckTotalPendingTransaction = "TOKEN-CHECK-TOTAL-PENDING-TRANSACTION";
+        public const string TokenCheckWalletTotalTransaction = "TOKEN-CHECK-WALLET-TOTAL-TRANSACTION";
+        public const string TokenCheckLastBlockFoundDate = "TOKEN-CHECK-LAST-BLOCK-FOUND-DATE";
+
     }
 }
