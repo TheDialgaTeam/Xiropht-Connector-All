@@ -50,6 +50,8 @@
         public const string TokenCheckTotalPendingTransaction = "TOKEN-CHECK-TOTAL-PENDING-TRANSACTION";
         public const string TokenCheckWalletTotalTransaction = "TOKEN-CHECK-WALLET-TOTAL-TRANSACTION";
         public const string TokenCheckLastBlockFoundDate = "TOKEN-CHECK-LAST-BLOCK-FOUND-DATE";
+        public const string TokenCheckBlock = "TOKEN-CHECK-BLOCK";
+        public const string TokenCheckTransaction = "TOKEN-CHECK-TRANSACTION";
 
     }
 }

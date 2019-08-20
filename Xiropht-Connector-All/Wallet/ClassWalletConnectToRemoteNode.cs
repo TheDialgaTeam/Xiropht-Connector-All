@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -159,6 +155,7 @@ namespace Xiropht_Connector_All.Wallet
         /// </summary>
         /// <param name="host"></param>
         /// <param name="port"></param>
+        /// <param name="isLinux"></param>
         /// <returns></returns>
         public async Task<bool> ConnectToRemoteNodeAsync(string host, int port, bool isLinux = false)
         {
@@ -204,7 +201,7 @@ namespace Xiropht_Connector_All.Wallet
                 DisconnectRemoteNodeClient();
                 return false;
             }
-            await Task.Factory.StartNew(() => EnableCheckConnection(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current).ConfigureAwait(false);
+            await Task.Factory.StartNew(EnableCheckConnection, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current).ConfigureAwait(false);
             
             return true;
         }
@@ -212,7 +209,6 @@ namespace Xiropht_Connector_All.Wallet
         /// <summary>
         /// Check the connection opened to the remote node.
         /// </summary>
-        /// <param name="isLinux"></param>
         private async void EnableCheckConnection()
         {
             while (RemoteNodeStatus)
@@ -224,13 +220,11 @@ namespace Xiropht_Connector_All.Wallet
                         RemoteNodeStatus = false;
                         break;
                     }
-                    else
+
+                    if (!await SendPacketRemoteNodeAsync(ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.KeepAlive + "|0"))
                     {
-                        if (!await SendPacketRemoteNodeAsync(ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.KeepAlive + "|0"))
-                        {
-                            RemoteNodeStatus = false;
-                            break;
-                        }
+                        RemoteNodeStatus = false;
+                        break;
                     }
 
                 }
@@ -261,38 +255,44 @@ namespace Xiropht_Connector_All.Wallet
         /// <summary>
         ///     Listen network of remote node.
         /// </summary>
-        [HostProtection(ExternalThreading = true)]
         public async Task<string> ListenRemoteNodeNetworkAsync()
         {
             try
             {
-
-                using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
+                if (_remoteNodeClient?.Client != null)
                 {
-                    using (var bufferedStreamNetwork = new BufferedStream(_remoteNodeStream, ClassConnectorSetting.MaxNetworkPacketSize))
+                    using (var remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
                     {
-                        using (var bufferPacket = new ClassWalletConnectToRemoteNodeObjectPacket())
+                        using (var bufferedStreamNetwork = new BufferedStream(remoteNodeStream,
+                            ClassConnectorSetting.MaxNetworkPacketSize))
                         {
-                            int received = await bufferedStreamNetwork.ReadAsync(bufferPacket.buffer, 0, bufferPacket.buffer.Length);
-                            if (received > 0)
+                            using (var bufferPacket = new ClassWalletConnectToRemoteNodeObjectPacket())
                             {
-                                string packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
-                                if (packet.Contains("*"))
+                                int received = await bufferedStreamNetwork.ReadAsync(bufferPacket.buffer, 0,
+                                    bufferPacket.buffer.Length);
+                                if (received > 0)
                                 {
-                                    if (!string.IsNullOrEmpty(MalformedPacket))
+                                    string packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
+                                    if (packet.Contains("*"))
                                     {
-                                        packet = MalformedPacket + packet;
-                                        MalformedPacket = string.Empty;
+                                        if (!string.IsNullOrEmpty(MalformedPacket))
+                                        {
+                                            packet = MalformedPacket + packet;
+                                            MalformedPacket = string.Empty;
+                                        }
+
+                                        return packet;
                                     }
-                                    return packet;
-                                }
-                                else
-                                {
-                                    if (MalformedPacket.Length -1 >= int.MaxValue || MalformedPacket.Length + packet.Length >= int.MaxValue)
+                                    else
                                     {
-                                        MalformedPacket = string.Empty;
+                                        if (MalformedPacket.Length - 1 >= int.MaxValue ||
+                                            MalformedPacket.Length + packet.Length >= int.MaxValue)
+                                        {
+                                            MalformedPacket = string.Empty;
+                                        }
+
+                                        MalformedPacket += packet;
                                     }
-                                    MalformedPacket += packet;
                                 }
                             }
                         }
@@ -330,7 +330,6 @@ namespace Xiropht_Connector_All.Wallet
         ///     Send a selected command to remote node.
         /// </summary>
         /// <param name="command"></param>
-        [HostProtection(ExternalThreading = true)]
         public async Task<bool> SendPacketRemoteNodeAsync(string command)
         {
             var clientTask = TaskSendPacketRemoteNode(command);
@@ -348,14 +347,19 @@ namespace Xiropht_Connector_All.Wallet
             }
             try
             {
-                using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
+                if (_remoteNodeClient?.Client != null)
                 {
-                    using (var bufferedStream = new BufferedStream(_remoteNodeStream, ClassConnectorSetting.MaxNetworkPacketSize))
+                    using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
                     {
-                        using (var packetObject = new ClassWalletConnectToRemoteNodeObjectSendPacket(command + "*"))
+                        using (var bufferedStream = new BufferedStream(_remoteNodeStream,
+                            ClassConnectorSetting.MaxNetworkPacketSize))
                         {
-                            await bufferedStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
-                            await bufferedStream.FlushAsync();
+                            using (var packetObject = new ClassWalletConnectToRemoteNodeObjectSendPacket(command + "*"))
+                            {
+                                await bufferedStream.WriteAsync(packetObject.packetByte, 0,
+                                    packetObject.packetByte.Length);
+                                await bufferedStream.FlushAsync();
+                            }
                         }
                     }
                 }
@@ -440,15 +444,18 @@ namespace Xiropht_Connector_All.Wallet
 
             try
             {
-                using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
+                if (_remoteNodeClient?.Client != null)
                 {
-                    using (var bufferedStreamNetwork = new BufferedStream(_remoteNodeStream, ClassConnectorSetting.MaxNetworkPacketSize))
+                    using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
                     {
-                        await bufferedStreamNetwork.WriteAsync(packet.packetByte, 0, packet.packetByte.Length);
-                        await bufferedStreamNetwork.FlushAsync();
+                        using (var bufferedStreamNetwork = new BufferedStream(_remoteNodeStream,
+                            ClassConnectorSetting.MaxNetworkPacketSize))
+                        {
+                            await bufferedStreamNetwork.WriteAsync(packet.packetByte, 0, packet.packetByte.Length);
+                            await bufferedStreamNetwork.FlushAsync();
+                        }
                     }
                 }
-               
             }
             catch (Exception error)
             {
