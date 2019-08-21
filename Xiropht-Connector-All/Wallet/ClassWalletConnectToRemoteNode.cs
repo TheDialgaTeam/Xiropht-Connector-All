@@ -273,7 +273,7 @@ namespace Xiropht_Connector_All.Wallet
                                 if (received > 0)
                                 {
                                     string packet = Encoding.UTF8.GetString(bufferPacket.buffer, 0, received);
-                                    if (packet.Contains("*"))
+                                    if (packet.Contains(ClassConnectorSetting.PacketSplitSeperator))
                                     {
                                         if (!string.IsNullOrEmpty(MalformedPacket))
                                         {
@@ -354,7 +354,7 @@ namespace Xiropht_Connector_All.Wallet
                         using (var bufferedStream = new BufferedStream(_remoteNodeStream,
                             ClassConnectorSetting.MaxNetworkPacketSize))
                         {
-                            using (var packetObject = new ClassWalletConnectToRemoteNodeObjectSendPacket(command + "*"))
+                            using (var packetObject = new ClassWalletConnectToRemoteNodeObjectSendPacket(command + ClassConnectorSetting.PacketSplitSeperator))
                             {
                                 await bufferedStream.WriteAsync(packetObject.packetByte, 0,
                                     packetObject.packetByte.Length);
@@ -387,51 +387,51 @@ namespace Xiropht_Connector_All.Wallet
                 case ClassWalletConnectToRemoteNodeObject.ObjectTransaction:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.WalletAskHisNumberTransaction +
-                        "|" + walletId+"*");
+                        "|" + walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectAskWalletAnonymityTransaction:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.WalletAskHisAnonymityNumberTransaction +
-                        "|" + walletId + "*");
+                        "|" + walletId + ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectSupply:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCoinMaxSupply + "|" +
-                        walletId+"*");
+                        walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectCirculating:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCoinCirculating + "|" +
-                        walletId+"*");
+                        walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectFee:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
-                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskTotalFee + "|" + walletId+"*");
+                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskTotalFee + "|" + walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectBlockMined:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskTotalBlockMined + "|" +
-                        walletId+"*");
+                        walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectDifficulty:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCurrentDifficulty + "|" +
-                        walletId+"*");
+                        walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectRate:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCurrentRate + "|" +
-                        walletId+"*");
+                        walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectPendingTransaction:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskTotalPendingTransaction +
-                        "|" + walletId+"*");
+                        "|" + walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectAskLastBlockFound:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskLastBlockFoundTimestamp +
-                        "|" + walletId+"*");
+                        "|" + walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectAskWalletTransaction:
                     return true;
@@ -446,9 +446,9 @@ namespace Xiropht_Connector_All.Wallet
             {
                 if (_remoteNodeClient?.Client != null)
                 {
-                    using (var _remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
+                    using (var remoteNodeStream = new NetworkStream(_remoteNodeClient.Client))
                     {
-                        using (var bufferedStreamNetwork = new BufferedStream(_remoteNodeStream,
+                        using (var bufferedStreamNetwork = new BufferedStream(remoteNodeStream,
                             ClassConnectorSetting.MaxNetworkPacketSize))
                         {
                             await bufferedStreamNetwork.WriteAsync(packet.packetByte, 0, packet.packetByte.Length);

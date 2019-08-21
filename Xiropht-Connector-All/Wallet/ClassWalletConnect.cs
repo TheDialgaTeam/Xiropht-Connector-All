@@ -117,9 +117,9 @@ namespace Xiropht_Connector_All.Wallet
                 {
                     if (packet != ClassSeedNodeStatus.SeedNone && packet != ClassSeedNodeStatus.SeedError)
                     {
-                        if (packet.Contains("*"))
+                        if (packet.Contains(ClassConnectorSetting.PacketSplitSeperator))
                         {
-                            var splitPacket = packet.Split(new[] { "*" }, StringSplitOptions.None);
+                            var splitPacket = packet.Split(new[] { ClassConnectorSetting.PacketSplitSeperator }, StringSplitOptions.None);
                             var packetCompleted = string.Empty;
                             foreach (var packetEach in splitPacket)
                             {
@@ -129,13 +129,13 @@ namespace Xiropht_Connector_All.Wallet
                                     {
                                         if (packetEach.Length > 1)
                                         {
-                                            if (packetEach.Replace("*", "") != ClassWalletCommand.ClassWalletReceiveEnumeration.WalletInvalidPacket)
+                                            if (packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, "") != ClassWalletCommand.ClassWalletReceiveEnumeration.WalletInvalidPacket)
                                             {
-                                                packetCompleted += DecryptPacketWallet(packetEach.Replace("*", "")) + "*";
+                                                packetCompleted += DecryptPacketWallet(packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, "")) + ClassConnectorSetting.PacketSplitSeperator;
                                             }
                                             else
                                             {
-                                                packetCompleted += packetEach.Replace("*", "") + "*";
+                                                packetCompleted += packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, "") + ClassConnectorSetting.PacketSplitSeperator;
                                             }
                                         }
                                     }
@@ -143,7 +143,7 @@ namespace Xiropht_Connector_All.Wallet
                             }
                             return packetCompleted;
                         }
-                        if (packet.Replace("*", "") != ClassWalletCommand.ClassWalletReceiveEnumeration.WalletInvalidPacket)
+                        if (packet.Replace(ClassConnectorSetting.PacketSplitSeperator, "") != ClassWalletCommand.ClassWalletReceiveEnumeration.WalletInvalidPacket)
                         {
                             return DecryptPacketWallet(packet);
                         }

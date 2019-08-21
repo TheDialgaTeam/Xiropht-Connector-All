@@ -96,6 +96,7 @@ namespace Xiropht_Connector_All.Seed
         private string _currentSeedNodeHost;
         private byte[] AesIvCertificate;
         private byte[] AesSaltCertificate;
+        private string _malformedPacket;
 
 
 
@@ -129,7 +130,7 @@ namespace Xiropht_Connector_All.Seed
         /// <returns></returns>
         public async Task<bool> StartConnectToSeedAsync(string host, int port = ClassConnectorSetting.SeedNodePort, bool isLinux = false)
         {
-            MalformedPacket = string.Empty;
+            _malformedPacket = string.Empty;
 
             if (!string.IsNullOrEmpty(host))
             {
@@ -170,135 +171,133 @@ namespace Xiropht_Connector_All.Seed
                 }
                 return true;
             }
-            else
-            {
-                Dictionary<string, int> ListOfSeedNodesSpeed = new Dictionary<string, int>();
-                foreach (var seedNode in ClassConnectorSetting.SeedNodeIp)
-                {
 
-                    try
+            Dictionary<string, int> listOfSeedNodesSpeed = new Dictionary<string, int>();
+            foreach (var seedNode in ClassConnectorSetting.SeedNodeIp)
+            {
+
+                try
+                {
+                    int seedNodeResponseTime = -1;
+                    Task taskCheckSeedNode = Task.Run(() => seedNodeResponseTime = CheckPing.CheckPingHost(seedNode.Key, true));
+                    taskCheckSeedNode.Wait(ClassConnectorSetting.MaxPingDelay);
+                    if (seedNodeResponseTime == -1)
                     {
-                        int seedNodeResponseTime = -1;
-                        Task taskCheckSeedNode = Task.Run(() => seedNodeResponseTime = CheckPing.CheckPingHost(seedNode.Key, true));
-                        taskCheckSeedNode.Wait(ClassConnectorSetting.MaxPingDelay);
-                        if (seedNodeResponseTime == -1)
-                        {
-                            seedNodeResponseTime = ClassConnectorSetting.MaxSeedNodeTimeoutConnect;
-                        }
+                        seedNodeResponseTime = ClassConnectorSetting.MaxSeedNodeTimeoutConnect;
+                    }
 #if DEBUG
                     Console.WriteLine(seedNode.Key + " response time: " + seedNodeResponseTime + " ms.");
 #endif
-                        ListOfSeedNodesSpeed.Add(seedNode.Key, seedNodeResponseTime);
-
-                    }
-                    catch
-                    {
-                        ListOfSeedNodesSpeed.Add(seedNode.Key, ClassConnectorSetting.MaxSeedNodeTimeoutConnect); // Max delay.
-                    }
+                    listOfSeedNodesSpeed.Add(seedNode.Key, seedNodeResponseTime);
 
                 }
-
-                ListOfSeedNodesSpeed = ListOfSeedNodesSpeed.OrderBy(u => u.Value).ToDictionary(z => z.Key, y => y.Value);
-
-                var success = false;
-                var seedNodeTested = false;
-                foreach (var seedNode in ListOfSeedNodesSpeed)
+                catch
                 {
+                    listOfSeedNodesSpeed.Add(seedNode.Key, ClassConnectorSetting.MaxSeedNodeTimeoutConnect); // Max delay.
+                }
+
+            }
+
+            listOfSeedNodesSpeed = listOfSeedNodesSpeed.OrderBy(u => u.Value).ToDictionary(z => z.Key, y => y.Value);
+
+            var success = false;
+            var seedNodeTested = false;
+            foreach (var seedNode in listOfSeedNodesSpeed)
+            {
 #if DEBUG
                     Console.WriteLine("Seed Node Host target: " + seedNode.Key);
 #endif
-                    try
+                try
+                {
+                    if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(seedNode.Key))
                     {
-                        if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(seedNode.Key))
+                        int totalDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item1;
+                        long lastDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item2;
+                        if (lastDisconnection + ClassConnectorSetting.SeedNodeMaxKeepAliveDisconnection < ClassUtils.DateUnixTimeNowSecond())
                         {
-                            int totalDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item1;
-                            long lastDisconnection = ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key].Item2;
-                            if (lastDisconnection + ClassConnectorSetting.SeedNodeMaxKeepAliveDisconnection < ClassUtils.DateUnixTimeNowSecond())
+                            totalDisconnection = 0;
+                            ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection, lastDisconnection);
+                        }
+                        if (totalDisconnection < ClassConnectorSetting.SeedNodeMaxDisconnection)
+                        {
+                            seedNodeTested = true;
+                            int maxRetry = 0;
+                            while (maxRetry < ClassConnectorSetting.SeedNodeMaxRetry || success)
                             {
-                                totalDisconnection = 0;
-                                ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection, lastDisconnection);
-                            }
-                            if (totalDisconnection < ClassConnectorSetting.SeedNodeMaxDisconnection)
-                            {
-                                seedNodeTested = true;
-                                int maxRetry = 0;
-                                while (maxRetry < ClassConnectorSetting.SeedNodeMaxRetry || success)
-                                {
-                                    _connector = new TcpClient();
-                                    var connectTask = _connector.ConnectAsync(seedNode.Key, port);
-                                    var connectTaskDelay = Task.Delay(ClassConnectorSetting.MaxSeedNodeTimeoutConnect);
+                                _connector = new TcpClient();
+                                var connectTask = _connector.ConnectAsync(seedNode.Key, port);
+                                var connectTaskDelay = Task.Delay(ClassConnectorSetting.MaxSeedNodeTimeoutConnect);
 
-                                    var completedConnectTask = await Task.WhenAny(connectTask, connectTaskDelay);
-                                    if (completedConnectTask == connectTask)
-                                    {
+                                var completedConnectTask = await Task.WhenAny(connectTask, connectTaskDelay);
+                                if (completedConnectTask == connectTask)
+                                {
 #if DEBUG
                                         Console.WriteLine("Successfully connected to Seed Node: " + seedNode.Key);
 #endif
-                                        success = true;
-                                        _isConnected = true;
-                                        _currentSeedNodeHost = seedNode.Key;
-                                        maxRetry = ClassConnectorSetting.SeedNodeMaxRetry;
-                                        try
-                                        {
-                                            _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
-                                        }
-                                        catch
-                                        {
-                                            return false;
-                                        }
-                                        await Task.Factory.StartNew(() => EnableCheckConnectionAsync(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current).ConfigureAwait(false);
-
-                                        return true;
-                                    }
-                                    else
-                                    {
-#if DEBUG
-                                        Console.WriteLine("Failed to connect to Seed Node: " + seedNode.Key);
-#endif
-                                        if (maxRetry >= ClassConnectorSetting.SeedNodeMaxRetry)
-                                        {
-                                            ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection + 1, ClassUtils.DateUnixTimeNowSecond());
-                                        }
-                                    }
+                                    success = true;
+                                    _isConnected = true;
+                                    _currentSeedNodeHost = seedNode.Key;
+                                    maxRetry = ClassConnectorSetting.SeedNodeMaxRetry;
                                     try
                                     {
-                                        _connector?.Close();
-                                        _connector?.Dispose();
+                                        _connector.SetSocketKeepAliveValues(20 * 60 * 1000, 30 * 1000);
                                     }
                                     catch
                                     {
-
+                                        return false;
                                     }
-                                    maxRetry++;
+                                    await Task.Factory.StartNew(EnableCheckConnectionAsync, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current).ConfigureAwait(false);
+
+                                    return true;
                                 }
+                                else
+                                {
+#if DEBUG
+                                        Console.WriteLine("Failed to connect to Seed Node: " + seedNode.Key);
+#endif
+                                    if (maxRetry >= ClassConnectorSetting.SeedNodeMaxRetry)
+                                    {
+                                        ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection + 1, ClassUtils.DateUnixTimeNowSecond());
+                                    }
+                                }
+                                try
+                                {
+                                    _connector?.Close();
+                                    _connector?.Dispose();
+                                }
+                                catch
+                                {
+
+                                }
+                                maxRetry++;
                             }
-                            else
-                            {
+                        }
+                        else
+                        {
 #if DEBUG
                             
                                 Console.WriteLine("Max disconnection is reach for seed node: " + seedNode.Key);
                             
 #endif
-                            }
                         }
-
-                    }
-                    catch (Exception error)
-                    {
-#if DEBUG
-                        Console.WriteLine("Error to connect on seed node: " + error.Message);
-#endif
                     }
 
                 }
-                if (!seedNodeTested) // Clean up just in case if every seed node return too much disconnection saved in their counter.
+                catch (Exception error)
                 {
-                    foreach (var seednode in ClassConnectorSetting.SeedNodeIp)
+#if DEBUG
+                        Console.WriteLine("Error to connect on seed node: " + error.Message);
+#endif
+                }
+
+            }
+            if (!seedNodeTested) // Clean up just in case if every seed node return too much disconnection saved in their counter.
+            {
+                foreach (var seednode in ClassConnectorSetting.SeedNodeIp)
+                {
+                    if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(seednode.Key))
                     {
-                        if (ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(seednode.Key))
-                        {
-                            ClassConnectorSetting.SeedNodeDisconnectScore[seednode.Key] = new Tuple<int, long>(0, 0);
-                        }
+                        ClassConnectorSetting.SeedNodeDisconnectScore[seednode.Key] = new Tuple<int, long>(0, 0);
                     }
                 }
             }
@@ -349,9 +348,9 @@ namespace Xiropht_Connector_All.Seed
             try
             {
                 
-                using(var _connectorStream = new NetworkStream(_connector.Client))
+                using(var connectorStream = new NetworkStream(_connector.Client))
                 {
-                    using (var bufferedNetworkStream = new BufferedStream(_connectorStream, ClassConnectorSetting.MaxNetworkPacketSize))
+                    using (var bufferedNetworkStream = new BufferedStream(connectorStream, ClassConnectorSetting.MaxNetworkPacketSize))
                     {
                         // 10/08/2018 - MAJOR_UPDATE_1_SECURITY
                         if (ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY) // SSL Layer for Send packet.
@@ -366,7 +365,7 @@ namespace Xiropht_Connector_All.Seed
                                         AesSaltCertificate = password.GetBytes(16);
                                     }
                                 }
-                                using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet, ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate) + "*"))
+                                using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet, ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate) + ClassConnectorSetting.PacketSplitSeperator))
                                 {
                                     await bufferedNetworkStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
                                     await bufferedNetworkStream.FlushAsync();
@@ -377,7 +376,7 @@ namespace Xiropht_Connector_All.Seed
                             {
                                 if (isSeedNode)
                                 {
-                                    using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(packet + "*"))
+                                    using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(packet + ClassConnectorSetting.PacketSplitSeperator))
                                     {
                                         await bufferedNetworkStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
                                         await bufferedNetworkStream.FlushAsync();
@@ -410,7 +409,6 @@ namespace Xiropht_Connector_All.Seed
         }
 
 
-        private string MalformedPacket;
 
 
         /// <summary>
@@ -428,9 +426,9 @@ namespace Xiropht_Connector_All.Seed
                 {
                     using (var bufferPacket = new ClassSeedNodeConnectorObjectPacket())
                     {
-                        using (var _connectorStream = new NetworkStream(_connector.Client))
+                        using (var connectorStream = new NetworkStream(_connector.Client))
                         {
-                            using (var bufferedNetworkStream = new BufferedStream(_connectorStream, ClassConnectorSetting.MaxNetworkPacketSize))
+                            using (var bufferedNetworkStream = new BufferedStream(connectorStream, ClassConnectorSetting.MaxNetworkPacketSize))
                             {
                                 int received = 0;
 
@@ -451,53 +449,50 @@ namespace Xiropht_Connector_All.Seed
                                                         AesSaltCertificate = password.GetBytes(16);
                                                     }
                                                 }
-                                                if (bufferPacket.packet.Contains("*"))
+                                                if (bufferPacket.packet.Contains(ClassConnectorSetting.PacketSplitSeperator))
                                                 {
-                                                    if (!string.IsNullOrEmpty(MalformedPacket))
+                                                    if (!string.IsNullOrEmpty(_malformedPacket))
                                                     {
-                                                        bufferPacket.packet = MalformedPacket + bufferPacket.packet;
-                                                        MalformedPacket = string.Empty;
+                                                        bufferPacket.packet = _malformedPacket + bufferPacket.packet;
+                                                        _malformedPacket = string.Empty;
                                                     }
-                                                    var splitPacket = bufferPacket.packet.Split(new[] { "*" }, StringSplitOptions.None);
+                                                    var splitPacket = bufferPacket.packet.Split(new[] { ClassConnectorSetting.PacketSplitSeperator }, StringSplitOptions.None);
                                                     bufferPacket.packet = string.Empty;
                                                     foreach (var packetEach in splitPacket)
                                                     {
-                                                        if (packetEach != null)
+                                                        if (!string.IsNullOrEmpty(packetEach))
                                                         {
-                                                            if (!string.IsNullOrEmpty(packetEach))
+                                                            if (packetEach.Length > 1)
                                                             {
-                                                                if (packetEach.Length > 1)
+                                                                if (packetEach.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
                                                                 {
-                                                                    if (packetEach.Contains(ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTransactionPerId))
+                                                                    bufferPacket.packet += packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, "") + ClassConnectorSetting.PacketSplitSeperator;
+                                                                }
+                                                                else
+                                                                {
+
+                                                                    string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, ""), ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate);
+
+                                                                    if (packetDecrypt.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
                                                                     {
-                                                                        bufferPacket.packet += packetEach.Replace("*", "") + "*";
+                                                                        var packetNewSeedNode = packetDecrypt.Replace(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode, "");
+                                                                        packetNewSeedNode = packetNewSeedNode.Replace(ClassConnectorSetting.PacketSplitSeperator, "");
+                                                                        var splitPacketNewSeedNode = packetNewSeedNode.Split(new[] { ";" }, StringSplitOptions.None);
+                                                                        var newSeedNodeHost = splitPacketNewSeedNode[0];
+                                                                        var newSeedNodeCountry = splitPacketNewSeedNode[1];
+
+                                                                        if (!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
+                                                                        {
+                                                                            ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, new Tuple<string, bool>(newSeedNodeCountry, false));
+                                                                        }
+                                                                        if (!ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(newSeedNodeHost))
+                                                                        {
+                                                                            ClassConnectorSetting.SeedNodeDisconnectScore.Add(newSeedNodeHost, new Tuple<int, long>(0, 0));
+                                                                        }
                                                                     }
                                                                     else
                                                                     {
-
-                                                                        string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace("*", ""), ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate);
-
-                                                                        if (packetDecrypt.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
-                                                                        {
-                                                                            var packetNewSeedNode = packetDecrypt.Replace(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode, "");
-                                                                            packetNewSeedNode = packetNewSeedNode.Replace("*", "");
-                                                                            var splitPacketNewSeedNode = packetNewSeedNode.Split(new[] { ";" }, StringSplitOptions.None);
-                                                                            var newSeedNodeHost = splitPacketNewSeedNode[0];
-                                                                            var newSeedNodeCountry = splitPacketNewSeedNode[1];
-
-                                                                            if (!ClassConnectorSetting.SeedNodeIp.ContainsKey(newSeedNodeHost))
-                                                                            {
-                                                                                ClassConnectorSetting.SeedNodeIp.Add(newSeedNodeHost, new Tuple<string, bool>(newSeedNodeCountry, false));
-                                                                            }
-                                                                            if (!ClassConnectorSetting.SeedNodeDisconnectScore.ContainsKey(newSeedNodeHost))
-                                                                            {
-                                                                                ClassConnectorSetting.SeedNodeDisconnectScore.Add(newSeedNodeHost, new Tuple<int, long>(0, 0));
-                                                                            }
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            bufferPacket.packet += packetDecrypt + "*";
-                                                                        }
+                                                                        bufferPacket.packet += packetDecrypt + ClassConnectorSetting.PacketSplitSeperator;
                                                                     }
                                                                 }
                                                             }
@@ -532,15 +527,15 @@ namespace Xiropht_Connector_All.Seed
                                                             {
                                                                 if (packetDecrypt != ClassAlgoErrorEnumeration.AlgoError)
                                                                 {
-                                                                    bufferPacket.packet = packetDecrypt + "*";
+                                                                    bufferPacket.packet = packetDecrypt + ClassConnectorSetting.PacketSplitSeperator;
                                                                 }
                                                                 else
                                                                 {
-                                                                    if (MalformedPacket.Length - 1 >= int.MaxValue || (long)(MalformedPacket.Length + bufferPacket.packet.Length) >= int.MaxValue)
+                                                                    if (_malformedPacket.Length - 1 >= int.MaxValue || (long)(_malformedPacket.Length + bufferPacket.packet.Length) >= int.MaxValue)
                                                                     {
-                                                                        MalformedPacket = string.Empty;
+                                                                        _malformedPacket = string.Empty;
                                                                     }
-                                                                    MalformedPacket += bufferPacket.packet;
+                                                                    _malformedPacket += bufferPacket.packet;
                                                                 }
                                                             }
 
@@ -625,7 +620,7 @@ namespace Xiropht_Connector_All.Seed
             ClassConnectorSetting.NETWORK_GENESIS_KEY = ClassConnectorSetting.NETWORK_GENESIS_DEFAULT_KEY;
             _isConnected = false;
             _currentSeedNodeHost = string.Empty;
-            MalformedPacket = string.Empty;
+            _malformedPacket = string.Empty;
             AesIvCertificate = null;
             AesSaltCertificate = null;
             _connector?.Close();
