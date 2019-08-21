@@ -104,7 +104,7 @@ namespace Xiropht_Connector_All.Wallet
         public string RemoteNodeHost;
         public bool RemoteNodeStatus;
         public int TotalInvalidPacket;
-        private bool disposed;
+        public bool Disposed;
         public long LastTrustDate;
 
         ~ClassWalletConnectToRemoteNode()
@@ -121,14 +121,14 @@ namespace Xiropht_Connector_All.Wallet
         // Protected implementation of Dispose pattern.
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
+            if (Disposed)
                 return;
 
             if (disposing)
             {
                 _remoteNodeClient = null;
             }
-            disposed = true;
+            Disposed = true;
         }
 
         /// <summary>
@@ -301,9 +301,7 @@ namespace Xiropht_Connector_All.Wallet
             }
             catch (Exception error)
             {
-                _remoteNodeClient?.Close();
-                _remoteNodeClient?.Dispose();
-                RemoteNodeStatus = false;
+                DisconnectRemoteNodeClient();
 #if DEBUG
                 Console.WriteLine("Error to listen remote node network: " + error.Message);
 #endif
@@ -321,6 +319,7 @@ namespace Xiropht_Connector_All.Wallet
             MalformedPacket = string.Empty;
             _remoteNodeClient?.Close();
             _remoteNodeClientType = string.Empty;
+            RemoteNodeStatus = false;
             TotalInvalidPacket = 0;
             LastTrustDate = 0;
             Dispose();
