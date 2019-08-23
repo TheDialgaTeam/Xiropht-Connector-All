@@ -94,8 +94,9 @@ namespace Xiropht_Connector_All.Seed
         private bool _isConnected;
         private bool disposed;
         private string _currentSeedNodeHost;
+        private byte[] AesIvCertificate;
+        private byte[] AesSaltCertificate;
         private string _malformedPacket;
-        private ClassAesEncryptionObject _aesEncryptionObject;
 
 
 
@@ -121,11 +122,6 @@ namespace Xiropht_Connector_All.Seed
                 _connector = null;
             }
             disposed = true;
-        }
-
-        public ClassSeedNodeConnector()
-        {
-            _aesEncryptionObject = null;
         }
 
         /// <summary>
@@ -254,12 +250,15 @@ namespace Xiropht_Connector_All.Seed
 
                                     return true;
                                 }
-#if DEBUG
-                                Console.WriteLine("Failed to connect to Seed Node: " + seedNode.Key);
-#endif
-                                if (maxRetry >= ClassConnectorSetting.SeedNodeMaxRetry)
+                                else
                                 {
-                                    ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection + 1, ClassUtils.DateUnixTimeNowSecond());
+#if DEBUG
+                                        Console.WriteLine("Failed to connect to Seed Node: " + seedNode.Key);
+#endif
+                                    if (maxRetry >= ClassConnectorSetting.SeedNodeMaxRetry)
+                                    {
+                                        ClassConnectorSetting.SeedNodeDisconnectScore[seedNode.Key] = new Tuple<int, long>(totalDisconnection + 1, ClassUtils.DateUnixTimeNowSecond());
+                                    }
                                 }
                                 try
                                 {
@@ -358,8 +357,15 @@ namespace Xiropht_Connector_All.Seed
                         {
                             if (isEncrypted)
                             {
-                                UpdateEncryption(certificate);
-                                using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(_aesEncryptionObject.EncryptString(packet) + ClassConnectorSetting.PacketSplitSeperator))
+                                if (AesIvCertificate == null)
+                                {
+                                    using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex(certificate.Substring(0, 8)))))
+                                    {
+                                        AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8); 
+                                        AesSaltCertificate = password.GetBytes(16);
+                                    }
+                                }
+                                using (ClassSeedNodeConnectorObjectSendPacket packetObject = new ClassSeedNodeConnectorObjectSendPacket(ClassAlgo.GetEncryptedResult(ClassAlgoEnumeration.Rijndael, packet, ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate) + ClassConnectorSetting.PacketSplitSeperator))
                                 {
                                     await bufferedNetworkStream.WriteAsync(packetObject.packetByte, 0, packetObject.packetByte.Length);
                                     await bufferedNetworkStream.FlushAsync();
@@ -404,25 +410,6 @@ namespace Xiropht_Connector_All.Seed
 
 
 
-        private void UpdateEncryption(string certificate)
-        {
-            if (_aesEncryptionObject == null)
-            {
-                _aesEncryptionObject = new ClassAesEncryptionObject();
-                using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate,
-                    ClassUtils.GetByteArrayFromString(ClassUtils.FromHex(certificate.Substring(0, 8)))))
-                {
-                    _aesEncryptionObject.AesIvCertificate =
-                        password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
-                    _aesEncryptionObject.AesSaltCertificate = password.GetBytes(16);
-                }
-            }
-
-
-            _aesEncryptionObject.Initialization(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE);
-
-        }
-
 
         /// <summary>
         ///     Listen and return packet from Seed Node.
@@ -454,8 +441,14 @@ namespace Xiropht_Connector_All.Seed
                                         {
                                             if (isEncrypted)
                                             {
-                                                UpdateEncryption(certificate);
-
+                                                if (AesIvCertificate == null)
+                                                {
+                                                    using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex(certificate.Substring(0, 8)))))
+                                                    {
+                                                        AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
+                                                        AesSaltCertificate = password.GetBytes(16);
+                                                    }
+                                                }
                                                 if (bufferPacket.packet.Contains(ClassConnectorSetting.PacketSplitSeperator))
                                                 {
                                                     if (!string.IsNullOrEmpty(_malformedPacket))
@@ -478,7 +471,7 @@ namespace Xiropht_Connector_All.Seed
                                                                 else
                                                                 {
 
-                                                                    string packetDecrypt = _aesEncryptionObject.DecryptString(packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, ""));
+                                                                    string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, ""), ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate);
 
                                                                     if (packetDecrypt.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
                                                                     {
@@ -512,9 +505,7 @@ namespace Xiropht_Connector_All.Seed
                                                     {
                                                         try
                                                         {
-                                                            UpdateEncryption(certificate);
-
-                                                            string packetDecrypt = _aesEncryptionObject.DecryptString(bufferPacket.packet);
+                                                            string packetDecrypt = ClassAlgo.GetDecryptedResult(ClassAlgoEnumeration.Rijndael, bufferPacket.packet, ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE, AesIvCertificate, AesSaltCertificate);
 
 
                                                             if (bufferPacket.packet.Contains(ClassSeedNodeCommand.ClassReceiveSeedEnumeration.WalletSendSeedNode))
@@ -630,8 +621,8 @@ namespace Xiropht_Connector_All.Seed
             _isConnected = false;
             _currentSeedNodeHost = string.Empty;
             _malformedPacket = string.Empty;
-            _aesEncryptionObject?.Dispose();
-            _aesEncryptionObject = null;
+            AesIvCertificate = null;
+            AesSaltCertificate = null;
             _connector?.Close();
             _connector?.Dispose();
             Dispose();

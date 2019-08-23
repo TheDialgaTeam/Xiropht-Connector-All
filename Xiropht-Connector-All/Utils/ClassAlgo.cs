@@ -237,7 +237,8 @@ namespace Xiropht_Connector_All.Utils
                             byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
                             cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
                             cryptoStream.FlushFinalBlock();
-                            return Convert.ToBase64String(memoryStream.ToArray());
+                            byte[] cipherTextBytes = memoryStream.ToArray();
+                            return Convert.ToBase64String(cipherTextBytes);
                         }
                     }
                 }
@@ -350,109 +351,4 @@ namespace Xiropht_Connector_All.Utils
             }
         }
     }
-
-    public class ClassAesEncryptionObject : IDisposable
-    {
-        public AesCryptoServiceProvider AesCryptoServiceProviderStatic;
-        public ICryptoTransform ICryptoTransformEncryptorStatic;
-        public ICryptoTransform ICryptoTransformDecryptorStatic;
-
-        public byte[] AesIvCertificate;
-        public byte[] AesSaltCertificate;
-
-        private bool disposed;
-
-
-        ~ClassAesEncryptionObject()
-        {
-            Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        // Protected implementation of Dispose pattern.
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-                return;
-
-            disposed = true;
-        }
-
-        public void Initialization(int keysize)
-        {
-            if (AesCryptoServiceProviderStatic == null)
-            {
-                AesCryptoServiceProviderStatic = new AesCryptoServiceProvider
-                {
-                    Mode = CipherMode.CFB,
-                    BlockSize = 128,
-                    KeySize = keysize,
-                    Padding = PaddingMode.PKCS7,
-                    Key = AesIvCertificate
-                };
-            }
-
-            if (ICryptoTransformEncryptorStatic == null)
-            {
-                ICryptoTransformEncryptorStatic =
-                    AesCryptoServiceProviderStatic.CreateEncryptor(AesIvCertificate, AesSaltCertificate);
-            }
-
-
-            ICryptoTransformDecryptorStatic =
-                AesCryptoServiceProviderStatic.CreateDecryptor(AesIvCertificate, AesSaltCertificate);
-
-        }
-
-        /// <summary>
-        /// Encrypt string from ClassAesEncryptionObject.
-        /// </summary>
-        /// <param name="plainText"></param>
-        /// <returns></returns>
-        public string EncryptString(string plainText)
-        {
-
-
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, ICryptoTransformEncryptorStatic, CryptoStreamMode.Write))
-                {
-                    byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-                    cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
-                    cryptoStream.FlushFinalBlock();
-                    return Convert.ToBase64String(memoryStream.ToArray());
-                }
-            }
-        }
-
-        /// <summary>
-        /// Decrypt string with ClassAesEncryptionObject.
-        /// </summary>
-        /// <param name="cipherText"></param>
-        /// <returns></returns>
-        public string DecryptString(string cipherText)
-        {
-
-            byte[] cipherTextBytes = Convert.FromBase64String(cipherText);
-            using (MemoryStream memoryStream = new MemoryStream(cipherTextBytes))
-            {
-                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, ICryptoTransformDecryptorStatic, CryptoStreamMode.Read))
-                {
-                    byte[] plainTextBytes = new byte[cipherTextBytes.Length];
-                    int decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
-                    return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
-                }
-            }
-
-
-        }
-
-
-    }
-
 }

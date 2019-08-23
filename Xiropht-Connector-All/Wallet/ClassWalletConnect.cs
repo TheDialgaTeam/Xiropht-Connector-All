@@ -24,7 +24,7 @@ namespace Xiropht_Connector_All.Wallet
         public const string Accepted = "ACCEPTED";
     }
 
-    public class ClassWalletConnect
+    public class ClassWalletConnect 
     {
         private readonly ClassSeedNodeConnector _seedNodeConnector;
 
@@ -98,7 +98,7 @@ namespace Xiropht_Connector_All.Wallet
             {
                 if (WalletPhase == ClassConnectorSettingEnumeration.WalletCreateType || WalletPhase == string.Empty) // Not allow to create a wallet on non-permanent seed nodes.
                 {
-                    if (ClassConnectorSetting.SeedNodeIp.ContainsKey(_seedNodeConnector.ReturnCurrentSeedNodeHost()))
+                    if(ClassConnectorSetting.SeedNodeIp.ContainsKey(_seedNodeConnector.ReturnCurrentSeedNodeHost()))
                     {
                         if (!ClassConnectorSetting.SeedNodeIp[_seedNodeConnector.ReturnCurrentSeedNodeHost()].Item2)
                         {
@@ -123,17 +123,20 @@ namespace Xiropht_Connector_All.Wallet
                             var packetCompleted = string.Empty;
                             foreach (var packetEach in splitPacket)
                             {
-                                if (!string.IsNullOrEmpty(packetEach))
+                                if (packetEach != null)
                                 {
-                                    if (packetEach.Length > 1)
+                                    if (!string.IsNullOrEmpty(packetEach))
                                     {
-                                        if (packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, "") != ClassWalletCommand.ClassWalletReceiveEnumeration.WalletInvalidPacket)
+                                        if (packetEach.Length > 1)
                                         {
-                                            packetCompleted += DecryptPacketWallet(packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, "")) + ClassConnectorSetting.PacketSplitSeperator;
-                                        }
-                                        else
-                                        {
-                                            packetCompleted += packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, "") + ClassConnectorSetting.PacketSplitSeperator;
+                                            if (packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, "") != ClassWalletCommand.ClassWalletReceiveEnumeration.WalletInvalidPacket)
+                                            {
+                                                packetCompleted += DecryptPacketWallet(packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, "")) + ClassConnectorSetting.PacketSplitSeperator;
+                                            }
+                                            else
+                                            {
+                                                packetCompleted += packetEach.Replace(ClassConnectorSetting.PacketSplitSeperator, "") + ClassConnectorSetting.PacketSplitSeperator;
+                                            }
                                         }
                                     }
                                 }
@@ -144,8 +147,10 @@ namespace Xiropht_Connector_All.Wallet
                         {
                             return DecryptPacketWallet(packet);
                         }
-
-                        return ClassWalletCommand.ClassWalletReceiveEnumeration.WalletInvalidPacket;
+                        else
+                        {
+                            return ClassWalletCommand.ClassWalletReceiveEnumeration.WalletInvalidPacket;
+                        }
                     }
                 }
             }

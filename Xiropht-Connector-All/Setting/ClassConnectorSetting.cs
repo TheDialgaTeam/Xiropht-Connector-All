@@ -46,8 +46,6 @@ namespace Xiropht_Connector_All.Setting
 
         public const string PacketSplitSeperator = "*";
 
-        public const string PacketContentSeperator = "|";
-
         public static Dictionary<string, Tuple<string, bool>> SeedNodeIp = new Dictionary<string, Tuple<string, bool>>
         {
             {"87.98.156.228", new Tuple<string, bool>("FR", true) },
