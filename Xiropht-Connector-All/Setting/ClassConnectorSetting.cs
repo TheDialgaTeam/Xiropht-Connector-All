@@ -14,7 +14,6 @@ namespace Xiropht_Connector_All.Setting
         public const string WalletTokenType = "WALLET-TOKEN"; // accepted only on seed nodes token port.
         public const string RemoteLoginType = "REMOTE";
         public const string MinerLoginType = "MINER";
-        public const string WalletLoginProxy = "WALLET-PROXY";
     }
 
     public class ClassConnectorSetting
@@ -45,6 +44,8 @@ namespace Xiropht_Connector_All.Setting
         public const string NETWORK_GENESIS_SECONDARY_KEY = "XIROPHTSEED"; // GENESIS SECONDARY KEY [Layer encryption key included on dynamic certificate key between tools and seed nodes]
 
         public const string PacketSplitSeperator = "*";
+
+        public const string PacketContentSeperator = "|";
 
         public static Dictionary<string, Tuple<string, bool>> SeedNodeIp = new Dictionary<string, Tuple<string, bool>>
         {

@@ -29,7 +29,7 @@ namespace Xiropht_Connector_All.Utils
             {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
 
         private static readonly List<string> ListOfSpecialCharacters =
-            new List<string> {"&", "~", "#", "@", "'", "(", "|", "\\", ")", "="};
+            new List<string> {"&", "~", "#", "@", "'", "(", "\\", ")", "="};
 
 
 

@@ -386,51 +386,51 @@ namespace Xiropht_Connector_All.Wallet
                 case ClassWalletConnectToRemoteNodeObject.ObjectTransaction:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.WalletAskHisNumberTransaction +
-                        "|" + walletId+ClassConnectorSetting.PacketSplitSeperator);
+                        ClassConnectorSetting.PacketContentSeperator + walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectAskWalletAnonymityTransaction:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.WalletAskHisAnonymityNumberTransaction +
-                        "|" + walletId + ClassConnectorSetting.PacketSplitSeperator);
+                        ClassConnectorSetting.PacketContentSeperator + walletId + ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectSupply:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
-                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCoinMaxSupply + "|" +
+                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCoinMaxSupply + ClassConnectorSetting.PacketContentSeperator +
                         walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectCirculating:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
-                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCoinCirculating + "|" +
+                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCoinCirculating + ClassConnectorSetting.PacketContentSeperator +
                         walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectFee:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
-                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskTotalFee + "|" + walletId+ClassConnectorSetting.PacketSplitSeperator);
+                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskTotalFee + ClassConnectorSetting.PacketContentSeperator + walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectBlockMined:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
-                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskTotalBlockMined + "|" +
+                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskTotalBlockMined + ClassConnectorSetting.PacketContentSeperator +
                         walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectDifficulty:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
-                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCurrentDifficulty + "|" +
+                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCurrentDifficulty + ClassConnectorSetting.PacketContentSeperator +
                         walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectRate:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
-                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCurrentRate + "|" +
+                        ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskCurrentRate + ClassConnectorSetting.PacketContentSeperator +
                         walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectPendingTransaction:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskTotalPendingTransaction +
-                        "|" + walletId+ClassConnectorSetting.PacketSplitSeperator);
+                        ClassConnectorSetting.PacketContentSeperator + walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectAskLastBlockFound:
                     packet = new ClassWalletConnectToRemoteNodeObjectSendPacket(
                         ClassRemoteNodeCommandForWallet.RemoteNodeSendPacketEnumeration.AskLastBlockFoundTimestamp +
-                        "|" + walletId+ClassConnectorSetting.PacketSplitSeperator);
+                        ClassConnectorSetting.PacketContentSeperator + walletId+ClassConnectorSetting.PacketSplitSeperator);
                     break;
                 case ClassWalletConnectToRemoteNodeObject.ObjectAskWalletTransaction:
                     return true;

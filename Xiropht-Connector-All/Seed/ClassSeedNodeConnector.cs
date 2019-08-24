@@ -94,8 +94,8 @@ namespace Xiropht_Connector_All.Seed
         private bool _isConnected;
         private bool disposed;
         private string _currentSeedNodeHost;
-        private byte[] AesIvCertificate;
-        private byte[] AesSaltCertificate;
+        public byte[] AesIvCertificate;
+        public byte[] AesSaltCertificate;
         private string _malformedPacket;
 
 
@@ -141,7 +141,7 @@ namespace Xiropht_Connector_All.Seed
                 {
                     _connector = new TcpClient();
                     var connectTask = _connector.ConnectAsync(host, port);
-                    var connectTaskDelay = Task.Delay(ClassConnectorSetting.MaxSeedNodeTimeoutConnect);
+                    var connectTaskDelay = Task.Delay(ClassConnectorSetting.MaxTimeoutConnect);
 
                     var completedConnectTask = await Task.WhenAny(connectTask, connectTaskDelay);
                     if (completedConnectTask != connectTask)
@@ -347,8 +347,8 @@ namespace Xiropht_Connector_All.Seed
             }
             try
             {
-                
-                using(var connectorStream = new NetworkStream(_connector.Client))
+
+                using (var connectorStream = new NetworkStream(_connector.Client))
                 {
                     using (var bufferedNetworkStream = new BufferedStream(connectorStream, ClassConnectorSetting.MaxNetworkPacketSize))
                     {
@@ -361,7 +361,7 @@ namespace Xiropht_Connector_All.Seed
                                 {
                                     using (PasswordDeriveBytes password = new PasswordDeriveBytes(certificate, ClassUtils.GetByteArrayFromString(ClassUtils.FromHex(certificate.Substring(0, 8)))))
                                     {
-                                        AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8); 
+                                        AesIvCertificate = password.GetBytes(ClassConnectorSetting.MAJOR_UPDATE_1_SECURITY_CERTIFICATE_SIZE / 8);
                                         AesSaltCertificate = password.GetBytes(16);
                                     }
                                 }
@@ -585,7 +585,7 @@ namespace Xiropht_Connector_All.Seed
 
             return _isConnected;
         }
-        
+
         /// <summary>
         /// Return directly status without to proceed check.
         /// </summary>
