@@ -14,6 +14,7 @@ namespace Xiropht_Connector_All.Setting
         public const string WalletTokenType = "WALLET-TOKEN"; // accepted only on seed nodes token port.
         public const string RemoteLoginType = "REMOTE";
         public const string MinerLoginType = "MINER";
+        public const string WalletLoginProxy = "WALLET-PROXY";
     }
 
     public class ClassConnectorSetting
