@@ -13,6 +13,7 @@
         public const string TokenCheckWalletAddressExist = "TOKEN-CHECK-WALLET-ADDRESS-EXIST";
         public const string TokenAskWalletTransfer = "TOKEN-ASK-WALLET-TRANSFER";
         public const string TokenAskRemoteNode = "TOKEN-ASK-REMOTE-NODE";
+        public const string TokenAskWalletQuestion = "TOKEN-ASK-WALLET-QUESTION";
 
         /// <summary>
         /// Reponse.
@@ -26,6 +27,8 @@
         public const string SendTokenCheckWalletAddressInvalid = "SEND-TOKEN-CHECK-WALLET-ADDRESS-INVALID";
         public const string SendTokenValidInformation = "SEND-TOKEN-VALID-INFORMATION";
         public const string SendTokenInvalidInformation = "SEND-TOKEN-INVALID-INFORMATION";
+        public const string SendTokenWalletQuestion = "SEND-TOKEN-WALLET-QUESTION";
+
 
         // Response of transaction.
         public const string SendTokenTransactionConfirmed = "SEND-TOKEN-TRANSACTION-CONFIRMED";

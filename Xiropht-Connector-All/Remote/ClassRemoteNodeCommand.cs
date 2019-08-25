@@ -40,7 +40,7 @@
             public const string RemoteCheckTrustedKey = "CHECK-TRUSTED-KEY";
             public const string RemoteAskSchemaTransaction = "ASK-SCHEMA-TRANSACTION";
             public const string RemoteAskSchemaBlock = "ASK-SCHEMA-BLOCK";
-
+            public const string RemoteSendProxyConfirmation = "SEND-PROXY-CONFIRMATION";
         }
 
         public class ClassRemoteNodeRecvFromSeedEnumeration
@@ -90,6 +90,9 @@
             public const string RemoteSendCheckTrustedKey = "SEND-CHECK-TRUSTED-KEY";
             public const string RemoteSendSchemaTransaction = "SEND-SCHEMA-TRANSACTION";
             public const string RemoteSendSchemaBlock = "SEND-SCHEMA-BLOCK";
+
+            public const string RemoteAskProxyConfirmation = "ASK-PROXY-CONFIRMATION";
+
 
         }
     }

@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using Xiropht_Connector_All.Setting;
 
 namespace Xiropht_Connector_All.Utils
@@ -32,6 +33,13 @@ namespace Xiropht_Connector_All.Utils
             new List<string> {"&", "~", "#", "@", "'", "(", "\\", ")", "="};
 
 
+
+        public static bool IsBase64String(string s)
+        {
+            s = s.Trim();
+            return (s.Length % 4 == 0) && Regex.IsMatch(s, @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.None);
+
+        }
 
         /// <summary>
         ///     Generate a dynamic certificate, include the static genesis secondary key

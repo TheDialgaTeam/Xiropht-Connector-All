@@ -20,17 +20,21 @@ namespace Xiropht_Connector_All.Utils
 
     public class ClassAlgo
     {
+        [ThreadStatic]
+        private static Rijndael RijndaelObject;
+
         /// <summary>
         ///     Decrypt the result received and retrieve it.
         /// </summary>
         /// <param name="idAlgo"></param>
         /// <param name="result"></param>
-        /// <param name="key"></param>
         /// <param name="size"></param>
+        /// <param name="AesIv"></param>
+        /// <param name="AesSalt"></param>
         /// <returns></returns>
         public static string GetDecryptedResult(string idAlgo, string result, int size, byte[] AesIv, byte[] AesSalt)
         {
-            if (result == ClassSeedNodeStatus.SeedNone)
+            if (result == ClassSeedNodeStatus.SeedNone || result == ClassSeedNodeStatus.SeedError)
             {
                 return result;
             }
@@ -41,10 +45,17 @@ namespace Xiropht_Connector_All.Utils
                 switch (idAlgo)
                 {
                     case ClassAlgoEnumeration.Rijndael:
-                        using (var decrypt = new Rijndael())
+                        if (ClassUtils.IsBase64String(result))
                         {
-                            return decrypt.DecryptString(result, size, AesIv, AesSalt);
+                            if (RijndaelObject == null)
+                            {
+                                RijndaelObject = new Rijndael();
+                            }
+                            return RijndaelObject.DecryptString(result, size, AesIv, AesSalt);
+
                         }
+
+                        break;
                     case ClassAlgoEnumeration.Xor:
                         break;
                 }
@@ -69,7 +80,7 @@ namespace Xiropht_Connector_All.Utils
         /// <returns></returns>
         public static string GetDecryptedResultManual(string idAlgo, string result, string key, int size)
         {
-            if (result == ClassSeedNodeStatus.SeedNone)
+            if (result == ClassSeedNodeStatus.SeedNone || result == ClassSeedNodeStatus.SeedError)
             {
                 return result;
             }
@@ -79,10 +90,16 @@ namespace Xiropht_Connector_All.Utils
                 switch (idAlgo)
                 {
                     case ClassAlgoEnumeration.Rijndael:
-                        using (var decrypt = new Rijndael())
+                        if (ClassUtils.IsBase64String(result))
                         {
-                            return decrypt.DecryptStringManual(result, key, size);
+                            if (RijndaelObject == null)
+                            {
+                                RijndaelObject = new Rijndael();
+                            }
+                            return RijndaelObject.DecryptStringManual(result, key, size);
                         }
+
+                        break;
                     case ClassAlgoEnumeration.Xor:
                         break;
                 }
@@ -103,8 +120,9 @@ namespace Xiropht_Connector_All.Utils
         /// </summary>
         /// <param name="idAlgo"></param>
         /// <param name="result"></param>
-        /// <param name="key"></param>
         /// <param name="size"></param>
+        /// <param name="AesIv"></param>
+        /// <param name="AesSalt"></param>
         /// <returns></returns>
         public static string GetEncryptedResult(string idAlgo, string result, int size, byte[] AesIv, byte[] AesSalt)
         {
@@ -113,10 +131,13 @@ namespace Xiropht_Connector_All.Utils
                 switch (idAlgo)
                 {
                     case ClassAlgoEnumeration.Rijndael:
-                        using (var encrypt = new Rijndael())
+
+                        if (RijndaelObject == null)
                         {
-                            return encrypt.EncryptString(result, size, AesIv, AesSalt);
+                            RijndaelObject = new Rijndael();
                         }
+                        return RijndaelObject.EncryptString(result, size, AesIv, AesSalt);
+                        
                     case ClassAlgoEnumeration.Xor:
                         break;
                 }
@@ -147,10 +168,13 @@ namespace Xiropht_Connector_All.Utils
                 switch (idAlgo)
                 {
                     case ClassAlgoEnumeration.Rijndael:
-                        using (var encrypt = new Rijndael())
+                        if (RijndaelObject == null)
                         {
-                            return encrypt.EncryptStringManual(result, key, size);
+                            RijndaelObject = new Rijndael();
                         }
+
+                        return RijndaelObject.EncryptStringManual(result, key, size);
+
                     case ClassAlgoEnumeration.Xor:
                         break;
                 }
@@ -189,7 +213,7 @@ namespace Xiropht_Connector_All.Utils
     public class Rijndael : IDisposable
     {
 
-        private  bool disposed;
+        private bool disposed;
 
 
         ~Rijndael()
@@ -216,10 +240,11 @@ namespace Xiropht_Connector_All.Utils
         /// Encrypt string from Rijndael.
         /// </summary>
         /// <param name="plainText"></param>
-        /// <param name="passPhrase"></param>
         /// <param name="keysize"></param>
+        /// <param name="aesIv"></param>
+        /// <param name="aesSalt"></param>
         /// <returns></returns>
-        public string EncryptString(string plainText,  int keysize, byte[] AesIv, byte[] AesSalt)
+        public string EncryptString(string plainText,  int keysize, byte[] aesIv, byte[] aesSalt)
         {
 
             using (var symmetricKey = new AesCryptoServiceProvider() { Mode = CipherMode.CFB })
@@ -227,8 +252,8 @@ namespace Xiropht_Connector_All.Utils
                 symmetricKey.BlockSize = 128;
                 symmetricKey.KeySize = keysize;
                 symmetricKey.Padding = PaddingMode.PKCS7;
-                symmetricKey.Key = AesIv;
-                using (ICryptoTransform encryptor = symmetricKey.CreateEncryptor(AesIv, AesSalt))
+                symmetricKey.Key = aesIv;
+                using (ICryptoTransform encryptor = symmetricKey.CreateEncryptor(aesIv, aesSalt))
                 {
                     using (MemoryStream memoryStream = new MemoryStream())
                     {
@@ -249,18 +274,19 @@ namespace Xiropht_Connector_All.Utils
         /// Decrypt string with Rijndael.
         /// </summary>
         /// <param name="cipherText"></param>
-        /// <param name="passPhrase"></param>
         /// <param name="keysize"></param>
+        /// <param name="aesIv"></param>
+        /// <param name="aesSalt"></param>
         /// <returns></returns>
-        public string DecryptString(string cipherText, int keysize, byte[] AesIv, byte[] AesSalt)
+        public string DecryptString(string cipherText, int keysize, byte[] aesIv, byte[] aesSalt)
         {
             using (var symmetricKey = new AesCryptoServiceProvider() { Mode = CipherMode.CFB })
             {
                 symmetricKey.BlockSize = 128;
                 symmetricKey.KeySize = keysize;
                 symmetricKey.Padding = PaddingMode.PKCS7;
-                symmetricKey.Key = AesIv;
-                using (ICryptoTransform decryptor = symmetricKey.CreateDecryptor(AesIv, AesSalt))
+                symmetricKey.Key = aesIv;
+                using (ICryptoTransform decryptor = symmetricKey.CreateDecryptor(aesIv, aesSalt))
                 {
                     byte[] cipherTextBytes = Convert.FromBase64String(cipherText);
                     using (MemoryStream memoryStream = new MemoryStream(cipherTextBytes))
