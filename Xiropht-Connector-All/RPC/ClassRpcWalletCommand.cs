@@ -14,6 +14,8 @@
         public const string TokenAskWalletTransfer = "TOKEN-ASK-WALLET-TRANSFER";
         public const string TokenAskRemoteNode = "TOKEN-ASK-REMOTE-NODE";
         public const string TokenAskWalletQuestion = "TOKEN-ASK-WALLET-QUESTION";
+        public const string TokenAskBlocktemplate = "TOKEN-ASK-BLOCKTEMPLATE";
+
 
         /// <summary>
         /// Reponse.
