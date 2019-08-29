@@ -128,7 +128,7 @@ namespace Xiropht_Connector_All.Seed
         ///     Start to connect on the seed node.
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> StartConnectToSeedAsync(string host, int port = ClassConnectorSetting.SeedNodePort, bool isLinux = false)
+        public async Task<bool> StartConnectToSeedAsync(string host, int port = ClassConnectorSetting.SeedNodePort, bool isLinux = false, int customTimeConnect = ClassConnectorSetting.MaxTimeoutConnect)
         {
             _malformedPacket = string.Empty;
 
@@ -141,7 +141,7 @@ namespace Xiropht_Connector_All.Seed
                 {
                     _connector = new TcpClient();
                     var connectTask = _connector.ConnectAsync(host, port);
-                    var connectTaskDelay = Task.Delay(ClassConnectorSetting.MaxTimeoutConnect);
+                    var connectTaskDelay = Task.Delay(customTimeConnect);
 
                     var completedConnectTask = await Task.WhenAny(connectTask, connectTaskDelay);
                     if (completedConnectTask != connectTask)
