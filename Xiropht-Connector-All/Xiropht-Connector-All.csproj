@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Mining\ClassPowSetting.cs" />
     <Compile Include="Remote\ClassRemoteNodeChecker.cs" />
     <Compile Include="Remote\ClassRemoteNodeCommand.cs" />
     <Compile Include="Remote\ClassRemoteNodeCommandForWallet.cs" />
