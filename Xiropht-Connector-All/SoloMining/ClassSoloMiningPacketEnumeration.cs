@@ -10,18 +10,15 @@
             public const string SendListBlockMethod = "SEND-LIST-BLOCK-METHOD";
             public const string SendContentBlockMethod = "SEND-CONTENT-BLOCK-METHOD";
 
-            public const string
-                SendEnableCheckShare = "SEND-ENABLE-CHECK-SHARE"; // Only working with solo mining proxy.
+            public const string SendEnableCheckShare = "SEND-ENABLE-CHECK-SHARE"; // Only working with solo mining proxy.
 
-            public const string
-                SendDisableCheckShare = "SEND-DISABLE-CHECK-SHARE"; // Only working with solo mining proxy.
+            public const string SendDisableCheckShare = "SEND-DISABLE-CHECK-SHARE"; // Only working with solo mining proxy.
 
             public const string ShareWrong = "WRONG"; // Block not accepted, only for solo mining and pool request.
             public const string ShareUnlock = "UNLOCK"; // Block accepted, only for solo mining and pool request.
             public const string ShareAleady = "ALREADY"; // Block already mined, only for solo mining and pool request.
 
-            public const string
-                ShareNotExist = "NOTEXIST"; // Block height not exist, only for solo mining and pool request.
+            public const string ShareNotExist = "NOTEXIST"; // Block height not exist, only for solo mining and pool request.
 
             public const string ShareGood = "GOOD"; // Work only with solo mining proxy.
             public const string ShareBad = "BAD"; // Work only with solo mining proxy.
@@ -35,7 +32,7 @@
             public const string ReceiveAskContentBlockMethod = "RECEIVE-ASK-CONTENT-BLOCK-METHOD";
             public const string KeepAlive = "KEEP-ALIVE"; // All phase
             public const string ShareHashrate = "SEND-MINER-HASHRATE"; // Work only with the solo mining proxy.
-
+            public const string ReceivePowJob = "RECEIVE-POW-JOB";
         }
     }
 }
