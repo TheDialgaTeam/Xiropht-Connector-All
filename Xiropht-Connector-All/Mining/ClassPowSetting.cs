@@ -46,7 +46,7 @@
 
         #region PoW Difficulty Share properties.
 
-        public const int PowDifficultyShareFromResultStartIndex = 8;
+        public const int PowDifficultyShareFromResultStartIndex = 0;
         public const int PowDifficultyShareFromResultEndIndex = 8;
 
         public const int PowDifficultyShareFromFirstNumberStartIndex = 64;

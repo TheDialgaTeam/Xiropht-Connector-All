@@ -57,6 +57,7 @@
         public const string TokenCheckLastBlockFoundDate = "TOKEN-CHECK-LAST-BLOCK-FOUND-DATE";
         public const string TokenCheckBlock = "TOKEN-CHECK-BLOCK";
         public const string TokenCheckTransaction = "TOKEN-CHECK-TRANSACTION";
+        public const string WalletTokenNetworkIsAndroidType = "IS-ANDROID";
 
     }
 }

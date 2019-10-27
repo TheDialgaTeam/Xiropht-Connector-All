@@ -96,7 +96,7 @@ namespace Xiropht_Connector_All.Wallet
             string packet = string.Empty;
             try
             {
-                if (WalletPhase == ClassConnectorSettingEnumeration.WalletCreateType || WalletPhase == string.Empty) // Not allow to create a wallet on non-permanent seed nodes.
+                if (WalletPhase == ClassWalletPhase.Create || WalletPhase == string.Empty) // Not allow to create a wallet on non-permanent seed nodes.
                 {
                     if (ClassConnectorSetting.SeedNodeIp.ContainsKey(_seedNodeConnector.ReturnCurrentSeedNodeHost()))
                     {

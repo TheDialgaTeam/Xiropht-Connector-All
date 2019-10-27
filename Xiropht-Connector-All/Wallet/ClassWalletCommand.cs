@@ -21,6 +21,7 @@
             public const string KeepAlive = "KEEP-ALIVE"; // All phase
             public const string ChangePassword = "WALLET-CHANGE-PASSWORD"; // Phase 4
             public const string DisablePinCode = "WALLET-DISABLE-PIN-CODE"; // Phase 4
+            public const string IsAndroid = "IS-ANDROID"; // Phase 4 small part of packets for change encryption class.
         }
 
         public class ClassWalletReceiveEnumeration
