@@ -331,6 +331,40 @@ namespace Xiropht_Connector_All.Utils
 
         }
 
+        /// <summary>
+        ///     Format amount with the max decimal place.
+        /// </summary>
+        /// <param name="amount"></param>
+        /// <returns></returns>
+        public static string FormatAmount(string amount)
+        {
+            if (!amount.Contains(".") && !amount.Contains(","))
+            {
+                amount += ".0";
+            }
+            else
+            {
+                amount = amount.Replace(",", ".");
+            }
+            string newAmount;
+            var splitAmount = amount.Split(new[] { "." }, StringSplitOptions.None);
+            var newPointNumber = ClassConnectorSetting.MaxDecimalPlace - splitAmount[1].Length;
+            if (newPointNumber > 0)
+            {
+                newAmount = splitAmount[0] + "." + splitAmount[1];
+                for (var i = 0; i < newPointNumber; i++) newAmount += "0";
+                amount = newAmount;
+            }
+            else if (newPointNumber < 0)
+            {
+                newAmount = splitAmount[0] + "." + splitAmount[1].Substring(0, splitAmount[1].Length + newPointNumber);
+                amount = newAmount;
+            }
+
+            return amount;
+        }
+
+
         public static TcpState GetState(TcpClient tcpClient)
         {
             var foo = IPGlobalProperties.GetIPGlobalProperties()
