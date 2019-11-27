@@ -21,13 +21,26 @@
 
         #region Offset computation properties on target share.
 
-        public const int OffsetTargetShareNonceByteIndex1 = 32;
-        public const int OffsetTargetShareNonceByteIndex2 = 33;
-        public const int OffsetTargetShareNonceByteIndex3 = 34;
-        public const int OffsetTargetShareNonceByteIndex4 = 35;
+        public const int OffsetTargetShareNonceByteIndex1 = 0;
+        public const int OffsetTargetShareNonceByteIndex2 = 8;
+        public const int OffsetTargetShareNonceByteIndex3 = 16;
+        public const int OffsetTargetShareNonceByteIndex4 = 31;
         public const int TargetShareNonceValueShift1 = 8;
         public const int TargetShareNonceValueShift2 = 16;
         public const int TargetShareNonceValueShift3 = 24;
+
+        #endregion
+
+
+        #region Offset computation properties on the share.
+
+        public const int OffsetShareNonceByteIndex1 = 0;
+        public const int OffsetShareNonceByteIndex2 = 8;
+        public const int OffsetShareNonceByteIndex3 = 16;
+        public const int OffsetShareNonceByteIndex4 = 31;
+        public const int ShareNonceValueShift1 = 8;
+        public const int ShareNonceValueShift2 = 16;
+        public const int ShareNonceValueShift3 = 24;
 
         #endregion
 
