@@ -62,11 +62,11 @@
         public const int PowDifficultyShareFromResultStartIndex = 0;
         public const int PowDifficultyShareFromResultEndIndex = 8;
 
-        public const int PowDifficultyShareFromFirstNumberStartIndex = 64;
-        public const int PowDifficultyShareFromFirstNumberEndIndex = 72;
+        public const int PowDifficultyShareFromFirstNumberStartIndex = 8;
+        public const int PowDifficultyShareFromFirstNumberEndIndex = 16;
 
-        public const int PowDifficultyShareFromSecondNumberStartIndex = 120;
-        public const int PowDifficultyShareFromSecondtNumberEndIndex = 128;
+        public const int PowDifficultyShareFromSecondNumberStartIndex = 16;
+        public const int PowDifficultyShareFromSecondtNumberEndIndex = 32;
 
         #endregion
 
