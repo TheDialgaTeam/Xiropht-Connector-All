@@ -413,7 +413,6 @@ namespace Xiropht_Connector_All.Seed
         ///     Listen and return packet from Seed Node.
         /// </summary>
         /// <returns></returns>
-        [HostProtection(ExternalThreading = true)]
         public async Task<string> ReceivePacketFromSeedNodeAsync(string certificate, bool isSeedNode = false, bool isEncrypted = false)
         {
             try

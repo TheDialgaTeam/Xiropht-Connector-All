@@ -15,7 +15,6 @@
     <RepositoryUrl>https://github.com/TheDialgaTeam/Xiropht-Connector-All</RepositoryUrl>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
